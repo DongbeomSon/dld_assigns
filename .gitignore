@@ -65,5 +65,4 @@ xlnx_auto_0_xdb/
 xst/
 _ngo/
 _xmsgs/
-*.didat
-dld_assign2/isim.log
+isim/
