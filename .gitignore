@@ -66,3 +66,7 @@ xst/
 _ngo/
 _xmsgs/
 isim/
+
+*.wdb
+*.log
+*.cmd
