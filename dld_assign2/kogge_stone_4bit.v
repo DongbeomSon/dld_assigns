@@ -18,28 +18,26 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module B_cell(
-	input G,
-	input P,
-	input GG,
-	input PP,
-	output GGG,
-	output PPP
-	);
+module B_cell(G,P,GG,PP,GGG,PPP);
+	input G;
+	input P;
+	input GG;
+	input PP;
+	output GGG;
+	output PPP;
 	
 	assign GGG = G | (P & GG);
 	assign PPP = P & PP;
 	
 endmodule
 
-module G_cell(
-	input G,
-	input P,
-	input GG,
-	input PP,
-	output GGG,
-	output PPP
-	);
+module G_cell(G,P,GG,PP,GGG,PPP);
+	input G;
+	input P;
+	input GG;
+	input PP;
+	output GGG;
+	output PPP;
 	
 	assign GGG = G | (P& GG);
 	assign PPP = P;
@@ -47,12 +45,13 @@ module G_cell(
 endmodule
 
 module buffer(
-	input G,
-	input P,
-	output GGG,
-	output PPP
+	G,P,GGG,PPP
 	);
 	
+	input G;
+	input P;
+	output GGG;
+	output PPP;
 	
 	assign GGG = G;
 	assign PPP = P;
@@ -60,39 +59,75 @@ module buffer(
 endmodule
 	
 module kogge_stone_4bit(
-	input A[bw:1],
-	input B[bw:1],
-	input cin,
-	output cout,
-	output sum[bw:1]
+	A,B,cin,
+	cout,sum
     );
 	 
-	wire G[bw:1] = A & B;
-	wire P[bw:1] = A ^ B;
-	
-	wire GG[4:1][bw:0];
-	wire PP[4:1][bw:0];
-	
-	assign GG[4:1][0] = {4{cin}};
-	assign PP[4:1][0] =	4'b0000;
-	assign GG[1][bw:1] = A & B;
-	assign PP[1][bw:1] = A ^ B;
-	
 	parameter bw = 4;
+	
+	input [bw:1] A;
+	input [bw:1] B;
+	input cin;
+	output cout;
+	output [bw:1] sum;
+	
+	wire [bw:1] G;
+	wire [bw:1] P;
+	
+	assign G = A & B;
+	assign P = A ^ B;
+	
+	wire [bw*4:0] GG;
+	wire [bw*4:0] PP;
+	
+	assign GG[0] = cin;
+	assign GG[bw] = cin;
+	assign GG[bw*2] = cin;
+	assign GG[bw*3] = cin;
+	assign PP[0] = 0;
+	assign PP[bw] = 0;
+	assign PP[bw*2] = 0;
+	assign PP[bw*3] = 0;
+	assign GG[bw:1] = A & B;
+	assign PP[bw:1] = A ^ B;
+
+	
 	genvar i;
 	genvar j;
+	genvar k;
+	//(2**(i-1))
 	
-	generate
-		for(i = 1; (2**(i-1) -1)<= bw; i = i+1) begin:
-			for(j = 1; j <= (2**(i-1); j = j+1) begin:
-				if(j <= bw) begin:
-					G_cell UG(GG[i][j], PP[i][j], GG[i][j-(2**i)], PP[i][j-(2**i)],GG[i+1][j], PP[i+1][j]];
+	 
+	
+/*	generate
+		for(i=1; (2**i -1)<= bw; i=i+1) begin :loop_1
+			for(j=1; j <= bw; j = j+1) begin :loop_2
+				if(j <= (2**(i-1))) begin
+					G_cell U1(GG[(i-1)*bw + j], PP[(i-1)*bw + j], GG[(i-1)*bw + (j-(2**i))], PP[(i-1)*bw + (j-(2**i))],GG[i*bw + j], PP[i*bw + j]);
+					assign sum[2**(i-1) + (j-1)] = P[2**(i-1) + (j-1)] ^ GG[i*bw + j];
+				end
+				else	begin
+					B_cell U2(GG[(i-1)*bw + j], PP[(i-1)*bw + j], GG[(i-1)*bw + (j-(2**i))], PP[(i-1)*bw + (j-(2**i))],GG[i*bw + j], PP[i*bw + j]);
 				end
 			end
-			for(; j <= bw; j = j+1) begin:
-				B_cell UB(GG[i][j], PP[i][j], GG[i][j-(2**i)], PP[i][j-(2**i)],GG[i+1][j], PP[i+1][j]];
+		end
+	endgenerate*/
+	
+		generate
+		for(i=1; (2**(i-1))<= bw; i=i+1) begin :loop_1
+			for(j=(2**(i-1)); j <= bw; j = j+1) begin :loop_2
+				if(j <= (2**i -1)) begin
+					G_cell U1(GG[(i-1)*bw + j], PP[(i-1)*bw + j], GG[(i-1)*bw + j - (2**(i-1))], PP[(i-1)*bw + j - (2**(i-1))],GG[i*bw + j], PP[i*bw + j]);
+					assign sum[j] = P[j] ^ GG[i*bw + j];
+				end
+				else	begin
+					B_cell U2(GG[(i-1)*bw + j], PP[(i-1)*bw + j], GG[(i-1)*bw + j - (2**(i-1))], PP[(i-1)*bw + j - (2**(i-1))],GG[i*bw + j], PP[i*bw + j]);
+				end
 			end
 		end
 	endgenerate
+	
+	
+
 
 endmodule
