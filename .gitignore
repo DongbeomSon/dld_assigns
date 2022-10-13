@@ -49,8 +49,6 @@ PROJECT_NAME/PROJECT_NAME_xdb/
 Thumbs.db
 .DS_Store
 
-######
-
 *.lso
 *.cmd_log
 *.spl
