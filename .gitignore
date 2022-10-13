@@ -71,3 +71,4 @@ isim/
 *.log
 *.cmd
 *.xmsgs
+*.exe
