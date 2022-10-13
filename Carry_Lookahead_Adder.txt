@@ -1,0 +1,79 @@
+module CLA_32bit(a, b, ci, sum, cout)
+	input	[31:0] a;
+	input	[31:0] b;
+	input	ci;
+	output	[31:0] sum;
+	output 	cout;
+	
+	wire [3:0]	GG;
+	wire [3:0]	PP;
+	wire [3:1]	C;
+	
+	CLALogic_4 CarryLogic_2 (GG[3:0], PP[3:0], ci, C[3:1], cout, GGG, PPP);
+	
+	CLA4 u0 (a[ 3:0], b[ 3: 0],   ci,   sum[ 3: 0],   GG[0], PP[0]);
+	CLA4 u1 (a[ 7:4], b[ 7: 4],   C[1], sum[ 7: 4],   GG[1], PP[1]);
+	CLA4 u2 (a[ 11:8], b[ 11: 8], C[2], sum[ 11: 8],  GG[2], PP[2]);
+	CLA4 u3 (a[ 15:12], b[ 15: 12], C[3], sum[ 15: 12], GG[3], PP[3]);
+	CLA4 u0 (a[ 16:19], b[ 16: 19], C[4], sum[ 16: 19], GG[4], PP[4]);
+	CLA4 u1 (a[ 20:23], b[ 20: 23], C[5], sum[ 20: 23], GG[5], PP[5]);
+	CLA4 u2 (a[ 24:27], b[ 24: 27], C[6], sum[ 24: 27], GG[6], PP[6]);
+	CLA4 u3 (a[ 28:31], b[ 28: 31], C[7], sum[ 28: 31], GG[7], PP[7]);
+endmodule $이 부분은 연결이라서 나중에 해도 괜찮을 듯.
+
+module CLA4(A, B, S, GG, PP);
+	input [3:0] A;
+	input [3:0] B;
+	input Ci;
+	output [3:0] S;
+	output PP;
+	output GG;
+	
+	wire [3:0] G;
+	wire [3:0] P;
+	wire [3:0] C;
+	
+	CLALogic_4 CarryLogic (G, P, Ci, C, Co, GG, PP);
+	GPFullAdder FA0 (A[0], B[0], Ci, G[0], P[0], s[0]);
+	GPFullAdder FA1 (A[1], B[1], C[1], G[1], P[1], s[1]);
+	GPFullAdder FA2 (A[2], B[2], C[2], G[2], P[2], s[2]);
+	GPFullAdder FA3 (A[3], B[3], C[3], G[3], P[3], s[3]);
+	GPFullAdder FA4 (A[4], B[4], C[4], G[4], P[4], s[4]);
+	GPFullAdder FA5 (A[5], B[5], C[5], G[5], P[5], s[5]);
+	GPFullAdder FA6 (A[6], B[6], C[6], G[6], P[6], s[6]);
+	GPFullAdder FA7 (A[7], B[7], C[7], G[7], P[7], s[7]);
+endmodule
+
+module GPFullAdder(X, Y, Cin, G, P, Sum);
+	input X;
+	input Y;
+	input Cin;
+	output G;
+	output P;
+	output Sum;
+	
+	assign G = X & Y;
+	assign P = X ^ Y;
+	assign Sum = P ^ Cin;
+endmodule
+
+module CLALogic_4(G, P, Ci, C, Co, GG, PP);
+	input [3:0] G;
+	input [3:0]	P;
+	input Ci;
+	output [3:1] C; $여기가 왜 3비트인지 잘 이해가 안가넹
+	output Co;
+	output GG;
+	output PP;
+	
+	assign PP = P[3] & P[2] & P[1] & P[0];
+	assign GG = G[3] || (P[3] & G[2]) || (P[3] & P[2] & G[1]) || (P[3] & P[2] & P[1] & P[0] & G[0]);
+	assign Co = GG || (PP & Ci);
+	assign C[1] = G[0] || (P[0] & Ci);
+	assign C[2] = G[1] || (P[1] & G[0]) || (P[0] & Ci);
+	assign C[3] = G[2] || (P[2] & G[1]) || (P[2] & P[1] & G[0]) || (P[2] & P[1] & P[0] & Ci);
+	assign C[4] = G[3] || (P[3] & G[2]) || (P[3] & P[2] & G[1]) || (P[3] & P[2] & P[1] & G[0]) || (P[3] & P[2] & P[1] & P[0] & Ci);
+	assign C[5] = G[4] || (P[4] & G[3]) || (P[4] & P[3] & G[2]) || (P[4] & P[3] & P[2] & G[1]) || (P[4] & P[3] & P[2] & P[1] & G[0]) || (P[4] & P[3] & P[2] & P[1] & P[0] & Ci);
+	assign C[6] = G[5] || (P[5] & G[4]) || (P[5] & P[4] & G[3]) || (P[5] & P[4] & P[3] & G[2]) || (P[5] & P[4] & P[3] & P[2] & G[1]) || (P[5] & P[4] & P[3] & P[2] & P[1] & G[0]) || (P[5] & P[4] & P[3] & P[2] & P[1] & P[0] & Ci);
+	assign C[7] = G[6] || (P[6] & G[5]) || (P[6] & P[5] & G[4]) || (P[6] & P[5] & P[4] & G[3]) || (P[6] & P[5] & P[4] & P[3] & G[2]) || (P[6] & P[5] & P[4] & P[3] & P[2] & G[1]) || (P[6] & P[5] & P[4] & P[3] & P[2] & P[1] & G[0]) || (P[6] & P[5] & P[4] & P[3] & P[2] & P[1] & P[0] & Ci);
+endmodule
