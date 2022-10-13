@@ -2,14 +2,14 @@ Command line:
    tb_CLA_32bit_isim_beh.exe
      -simmode  gui
      -simrunnum  0
-     -socket  10573
+     -socket  11897
 
-Thu Oct 13 13:24:30 2022
+Thu Oct 13 23:29:17 2022
 
 
- Elaboration Time: 0.03125 sec
+ Elaboration Time: 0.015625 sec
 
- Current Memory Usage: 5154.35 Meg
+ Current Memory Usage: 5154.88 Meg
 
  Total Signals          : 101
  Total Nets             : 223
@@ -21,9 +21,9 @@ Thu Oct 13 13:24:30 2022
  Total Scalar Nets and Variables : 368
 Total Line Count : 99
 
- Total Simulation Time: 0.125 sec
+ Total Simulation Time: 0.015625 sec
 
- Current Memory Usage: 4839.78 Meg
+ Current Memory Usage: 4683.02 Meg
 
-Thu Oct 13 14:01:57 2022
+Thu Oct 13 23:37:55 2022
 
