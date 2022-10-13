@@ -1,0 +1,1 @@
+-intstyle "ise" -incremental -lib "unisims_ver" -lib "unimacro_ver" -lib "xilinxcorelib_ver" -lib "secureip" -o "C:/Xilinx/14.7/dld_assign2/tb_CLA_32bit_isim_beh.exe" -prj "C:/Xilinx/14.7/dld_assign2/tb_CLA_32bit_beh.prj" "work.tb_CLA_32bit" "work.glbl" 
