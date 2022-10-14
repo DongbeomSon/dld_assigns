@@ -33,6 +33,7 @@ module tb_kogge_stone;
 	wire [31:0] S;
 	wire Cout;
 
+	
 	// Instantiate the Unit Under Test (UUT)
 	kogge_stone uut (
 		.A(A), 

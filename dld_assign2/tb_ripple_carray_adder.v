@@ -23,14 +23,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 module tb_ripple_carray_adder;
-
+	parameter bw = 32;
 	// Inputs
-	reg [3:0] A;
-	reg [3:0] B;
+	reg [bw:1] A;
+	reg [bw:1] B;
 	reg cin;
+	
+	reg CLK;
+	reg RESETn;
 
 	// Outputs
-	wire [3:0] sum;
+	wire [bw:1] sum;
 	wire cout;
 
 	// Instantiate the Unit Under Test (UUT)
@@ -39,20 +42,31 @@ module tb_ripple_carray_adder;
 		.B(B), 
 		.cin(cin), 
 		.sum(sum), 
-		.cout(cout)
+		.cout(cout),
+		.CLK(CLK),
+		.RESETn(RESETn)
 	);
 
 	initial begin
 		// Initialize Inputs
-		A = 14;
-		B = 1;
+		A = 0;
+		B = 0;
 		cin = 0;
-
+		
 		// Wait 100 ns for global reset to finish
-		#100;
-        
+		#500;
+        		
+		$finish;
 		// Add stimulus here
 
+	end
+      	always #50 A = A + 1;
+	always #50 B = B + 2;
+	initial begin
+		CLK = 0;
+		RESETn = 1;
+		#5;
+		forever #10 CLK = ~CLK;
 	end
       
 endmodule

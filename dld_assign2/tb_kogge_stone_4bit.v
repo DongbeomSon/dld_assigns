@@ -22,25 +22,29 @@
 // 
 ////////////////////////////////////////////////////////////////////////////////
 
-module tb_kogge_stone_4bit;
+module tb_kogge_stone_Nbit;
 
 	// Inputs
-	parameter bw = 16;
+	parameter bw = 32;
 	reg [bw:1] A;
 	reg [bw:1] B;
 	reg cin;
+	reg CLK;
+	reg RESETn;
 
 	// Outputs
 	wire cout;
 	wire [bw:1] sum;
 
 	// Instantiate the Unit Under Test (UUT)
-	kogge_stone_4bit uut (
+	kogge_stone_Nbit uut (
 		.A(A), 
 		.B(B), 
 		.cin(cin), 
 		.cout(cout), 
-		.sum(sum)
+		.sum(sum),
+		.clk(CLK),
+		.resetn(RESETn)
 	);
 
 	initial begin
@@ -50,10 +54,19 @@ module tb_kogge_stone_4bit;
 		cin = 1;
 
 		// Wait 100 ns for global reset to finish
-		#100;
+		#500;
         
 		// Add stimulus here
 
+	end
+	
+	always #50 A = A + 1;
+	always #50 B = B + 2;
+	initial begin
+		CLK = 0;
+		RESETn = 1;
+		#20;
+		forever #20 CLK = ~CLK;
 	end
       
 endmodule

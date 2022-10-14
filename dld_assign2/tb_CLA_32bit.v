@@ -28,6 +28,8 @@ module tb_CLA_32bit;
 	reg [31:0] A;
 	reg [31:0] B;
 	reg cin;
+	
+	reg CLK, RESETn;
 
 	// Outputs
 	wire [31:0] sum;
@@ -39,20 +41,32 @@ module tb_CLA_32bit;
 		.B(B), 
 		.cin(cin), 
 		.sum(sum), 
-		.cout(cout)
+		.cout(cout),
+		.CLK(CLK),
+		.RESETn(RESETn)
 	);
 
 	initial begin
 		// Initialize Inputs
-		A = 128;
-		B = 64;
-		cin = 1;
-
+		A = 0;
+		B = 0;
+		cin = 0;
+		
 		// Wait 100 ns for global reset to finish
-		#100;
-        
+		#500;
+        		
+		$finish;
 		// Add stimulus here
 
+	end
+	
+   always #50 A = A + 1;
+	always #50 B = B + 2;
+	initial begin
+		CLK = 0;
+		RESETn = 1;
+		#5;
+		forever #10 CLK = ~CLK;
 	end
       
 endmodule

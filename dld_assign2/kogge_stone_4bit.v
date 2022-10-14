@@ -58,19 +58,25 @@ module buffer(
 	
 endmodule
 	
-module kogge_stone_4bit(
+module kogge_stone_Nbit(
 	A,B,cin,
-	cout,sum
+	cout,sum,
+	clk, resetn
     );
 	 
-	parameter bw = 16;
+	parameter bw = 32;
 	parameter integer level = $ceil($clog2(bw+1))+1;
 	
 	input [bw:1] A;
 	input [bw:1] B;
 	input cin;
-	output cout;
-	output [bw:1] sum;
+	input clk;
+	input resetn;
+	output reg cout;
+	output reg [bw:1] sum;
+	
+	wire CO;
+	wire [bw:1] S;
 	
 	wire [bw:1] G;
 	wire [bw:1] P;
@@ -131,15 +137,25 @@ module kogge_stone_4bit(
 			for(j=(2**(i-1)); j <= bw; j = j+1) begin :loop_3
 				if(j <= (2**i -1)) begin
 					G_cell U1(GG[(i-1)*(bw+1) + j], PP[(i-1)*(bw+1) + j], GG[(i-1)*(bw+1) + j - (2**(i-1))], PP[(i-1)*(bw+1) + j - (2**(i-1))],GG[i*(bw+1) + j], PP[i*(bw+1) + j]);
-					assign sum[j] = P[j] ^ GG[i*(bw+1) + j-1];
+					assign S[j] = P[j] ^ GG[i*(bw+1) + j-1];
 				end
 				else	begin
 					B_cell U2(GG[(i-1)*(bw+1) + j], PP[(i-1)*(bw+1) + j], GG[(i-1)*(bw+1) + j - (2**(i-1))], PP[(i-1)*(bw+1) + j - (2**(i-1))],GG[i*(bw+1) + j], PP[i*(bw+1) + j]);
 				end
 			end
 		end
-	assign cout = GG[(i-1)*(bw+1) + bw];
+	assign Co = GG[(i-1)*(bw+1) + bw];
 	endgenerate
+	
+	always@(posedge clk, negedge resetn) begin
+		if(!resetn) begin
+			cout <= 0;
+			sum <= 0;
+		end else begin
+			cout <= Co;
+			sum <= S;
+		end
+	end
 
 
 endmodule
