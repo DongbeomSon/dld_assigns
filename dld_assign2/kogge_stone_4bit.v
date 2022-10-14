@@ -63,7 +63,8 @@ module kogge_stone_4bit(
 	cout,sum
     );
 	 
-	parameter bw = 4;
+	parameter bw = 16;
+	parameter integer level = $ceil($clog2(bw+1))+1;
 	
 	input [bw:1] A;
 	input [bw:1] B;
@@ -77,27 +78,14 @@ module kogge_stone_4bit(
 	assign G = A & B;
 	assign P = A ^ B;
 	
-	wire [bw*4:0] GG;
-	wire [bw*4:0] PP;
-	
-	assign GG[0] = cin;
-	assign GG[bw] = cin;
-	assign GG[bw*2] = cin;
-	assign GG[bw*3] = cin;
-	assign PP[0] = 0;
-	assign PP[bw] = 0;
-	assign PP[bw*2] = 0;
-	assign PP[bw*3] = 0;
-	assign GG[bw:1] = A & B;
-	assign PP[bw:1] = A ^ B;
+	wire [(bw+1)*level:0] GG;
+	wire [(bw+1)*level:0] PP;
 
 	
 	genvar i;
 	genvar j;
-	genvar k;
 	//(2**(i-1))
 	
-	 
 	
 /*	generate
 		for(i=1; (2**i -1)<= bw; i=i+1) begin :loop_1
@@ -112,22 +100,46 @@ module kogge_stone_4bit(
 			end
 		end
 	endgenerate*/
+/*	assign GG[0] = cin;
+	assign GG[(bw+1)] = cin;
+	assign GG[(bw+1)*2] = cin;
+	assign GG[(bw+1)*3] = cin;
+	assign PP[0] = 0;
+	assign PP[(bw+1)] = 0;
+	assign PP[(bw+1)*2] = 0;
+	assign PP[(bw+1)*3] = 0;*/
 	
-		generate
-		for(i=1; (2**(i-1))<= bw; i=i+1) begin :loop_1
-			for(j=(2**(i-1)); j <= bw; j = j+1) begin :loop_2
-				if(j <= (2**i -1)) begin
-					G_cell U1(GG[(i-1)*bw + j], PP[(i-1)*bw + j], GG[(i-1)*bw + j - (2**(i-1))], PP[(i-1)*bw + j - (2**(i-1))],GG[i*bw + j], PP[i*bw + j]);
-					assign sum[j] = P[j] ^ GG[i*bw + j];
-				end
-				else	begin
-					B_cell U2(GG[(i-1)*bw + j], PP[(i-1)*bw + j], GG[(i-1)*bw + j - (2**(i-1))], PP[(i-1)*bw + j - (2**(i-1))],GG[i*bw + j], PP[i*bw + j]);
-				end
-			end
+	generate
+		for(i=1; i <= level+1;i=i+1)begin:loop_init
+			assign GG[(bw+1)*(i-1)] = cin; 
+			assign PP[(bw+1)*(i-1)] = 0;
 		end
 	endgenerate
 	
+	assign GG[bw:1] = A & B;
+	assign PP[bw:1] = A ^ B;
 	
+	generate
+		for(i=1; (2**(i-1))<= bw; i=i+1) begin :loop_1
+			if(i > 1) begin
+				for(j=2**(i-2); j <= bw; j = j+1) begin : loop_2
+					if(j <=(2**(i-1)-1)) begin
+						buffer U0(GG[(i-1)*(bw+1) + j], PP[(i-1)*(bw+1) + j],GG[i*(bw+1) + j], PP[i*(bw+1) + j]);
+					end
+				end
+			end
+			for(j=(2**(i-1)); j <= bw; j = j+1) begin :loop_3
+				if(j <= (2**i -1)) begin
+					G_cell U1(GG[(i-1)*(bw+1) + j], PP[(i-1)*(bw+1) + j], GG[(i-1)*(bw+1) + j - (2**(i-1))], PP[(i-1)*(bw+1) + j - (2**(i-1))],GG[i*(bw+1) + j], PP[i*(bw+1) + j]);
+					assign sum[j] = P[j] ^ GG[i*(bw+1) + j-1];
+				end
+				else	begin
+					B_cell U2(GG[(i-1)*(bw+1) + j], PP[(i-1)*(bw+1) + j], GG[(i-1)*(bw+1) + j - (2**(i-1))], PP[(i-1)*(bw+1) + j - (2**(i-1))],GG[i*(bw+1) + j], PP[i*(bw+1) + j]);
+				end
+			end
+		end
+	assign cout = GG[(i-1)*(bw+1) + bw];
+	endgenerate
 
 
 endmodule

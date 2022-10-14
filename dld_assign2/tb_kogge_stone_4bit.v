@@ -25,13 +25,14 @@
 module tb_kogge_stone_4bit;
 
 	// Inputs
-	reg [4:1] A;
-	reg [4:1] B;
+	parameter bw = 16;
+	reg [bw:1] A;
+	reg [bw:1] B;
 	reg cin;
 
 	// Outputs
 	wire cout;
-	wire [4:1] sum;
+	wire [bw:1] sum;
 
 	// Instantiate the Unit Under Test (UUT)
 	kogge_stone_4bit uut (
@@ -44,9 +45,9 @@ module tb_kogge_stone_4bit;
 
 	initial begin
 		// Initialize Inputs
-		A = 3;
-		B = 6;
-		cin = 0;
+		A = 100000;
+		B = 100000;
+		cin = 1;
 
 		// Wait 100 ns for global reset to finish
 		#100;
