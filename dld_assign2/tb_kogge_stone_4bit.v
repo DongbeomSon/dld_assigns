@@ -49,24 +49,24 @@ module tb_kogge_stone_Nbit;
 
 	initial begin
 		// Initialize Inputs
-		A = 100000;
-		B = 100000;
-		cin = 1;
-
+		A = 0;
+		B = 0;
+		cin = 0;
+		
 		// Wait 100 ns for global reset to finish
-		#500;
-        
+		#500000;
+        		
+		$finish;
 		// Add stimulus here
 
 	end
-	
-	always #50 A = A + 1;
-	always #50 B = B + 2;
+      	always #50 A = A + 30000;
+	always #50 B = B + 50000;
 	initial begin
 		CLK = 0;
 		RESETn = 1;
-		#20;
-		forever #20 CLK = ~CLK;
+		#5;
+		forever #10 CLK = ~CLK;
 	end
       
 endmodule

@@ -36,7 +36,7 @@ module tb_CLA_32bit;
 	wire cout;
 
 	// Instantiate the Unit Under Test (UUT)
-	CLA_32bit uut (
+	pipe_CLA_32bit uut (
 		.A(A), 
 		.B(B), 
 		.cin(cin), 
@@ -53,15 +53,14 @@ module tb_CLA_32bit;
 		cin = 0;
 		
 		// Wait 100 ns for global reset to finish
-		#500;
+		#500000;
         		
 		$finish;
 		// Add stimulus here
 
 	end
-	
-   always #50 A = A + 1;
-	always #50 B = B + 2;
+      	always #50 A = A + 30000;
+	always #50 B = B + 50000;
 	initial begin
 		CLK = 0;
 		RESETn = 1;
