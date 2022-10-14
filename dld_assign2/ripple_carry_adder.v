@@ -34,14 +34,14 @@ module ripple_carry_adder(
 		sum, cout
     );
 	 
+	 parameter bw = 4;
+	 
 	 input [bw:1] A;
 	 input [bw:1] B;
 	 input cin;
 	 output [bw:1] sum;
 	 output cout;
 	 
-	 
-	 parameter bw = 4;
 	 
 	 wire [bw:0] G;
 	 wire [bw:0] P;
