@@ -75,7 +75,7 @@ module kogge_stone_Nbit(
 	output reg cout;
 	output reg [bw:1] sum;
 	
-	wire CO;
+	wire Co;
 	wire [bw:1] S;
 	
 	wire [bw:1] G;
@@ -143,8 +143,11 @@ module kogge_stone_Nbit(
 					B_cell U2(GG[(i-1)*(bw+1) + j], PP[(i-1)*(bw+1) + j], GG[(i-1)*(bw+1) + j - (2**(i-1))], PP[(i-1)*(bw+1) + j - (2**(i-1))],GG[i*(bw+1) + j], PP[i*(bw+1) + j]);
 				end
 			end
+			
+			if(2**i > bw) begin
+				assign Co = GG[(i*(bw+1) + bw)];
+			end
 		end
-	assign Co = GG[(i-1)*(bw+1) + bw];
 	endgenerate
 	
 	always@(posedge clk, negedge resetn) begin
