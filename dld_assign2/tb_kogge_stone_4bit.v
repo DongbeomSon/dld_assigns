@@ -37,14 +37,14 @@ module tb_kogge_stone_Nbit;
 	wire [bw:1] sum;
 
 	// Instantiate the Unit Under Test (UUT)
-	kogge_stone_Nbit uut (
+	pipe_kogge_stone_Nbit uut (
 		.A(A), 
 		.B(B), 
 		.cin(cin), 
 		.cout(cout), 
 		.sum(sum),
-		.clk(CLK),
-		.resetn(RESETn)
+		.CLK(CLK),
+		.RESETn(RESETn)
 	);
 
 	initial begin
