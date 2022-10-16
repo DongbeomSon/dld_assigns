@@ -65,7 +65,8 @@ module kogge_stone_Nbit(
     );
 	 
 	parameter bw = 32;
-	parameter integer level = $ceil($clog2(bw+1))+1;
+	//parameter integer level = $ceil($clog2(bw+1))+1;
+	parameter integer level = 7;
 	
 	input [bw:1] A;
 	input [bw:1] B;
@@ -194,27 +195,35 @@ module pipe_kogge_stone_Nbit(
 	wire [(bw+1)*level:0] GG;
 	wire [(bw+1)*level:0] PP;
 	
-	reg [(bw+1)*level:0] p_GG; 
-	reg [(bw+1)*level:0] p_PP;
-
+	wire [(bw+1)*level:0] p_GG; 
+	wire [(bw+1)*level:0] p_PP;
+	
+	reg [bw:1] REG_GG;
+	reg [bw:1] REG_PP;
 	
 	genvar i;
 	genvar j;
 	//(2**(i-1))
 	
+
+	
+	assign GG[bw:1] = A[bw:1] & B[bw:1];
+	assign PP[bw:1] = A[bw:1] ^ B[bw:1];
+	assign p_GG[bw:1] = REG_GG[bw:1];
+	assign p_PP[bw:1] = REG_PP[bw:1];
+	wire cl;
+	wire [bw:1] aS;
+	reg p_C;
+	reg [bw:1]p_S;
+	
 	generate
 		for(i=1; i <= level+1;i=i+1)begin:loop_init
 			assign GG[(bw+1)*(i-1)] = cin; 
 			assign PP[(bw+1)*(i-1)] = 0;
+			assign p_GG[(bw+1)*(i-1)] = p_C;
+			assign p_PP[(bw+1)*(i-1)] = 0;
 		end
 	endgenerate
-	
-	assign GG[bw:1] = A[bw:1] & B[bw:1];
-	assign PP[bw:1] = A[bw:1] ^ B[bw:1];
-	wire cl;
-	wire [bw:1] aS;
-	reg p_C;
-	reg p_S;
 	
 	generate
 		for(i=1; (2**(i-1))<= bw; i=i+1) begin :loop_1
@@ -269,8 +278,8 @@ module pipe_kogge_stone_Nbit(
 		if(!RESETn) begin
 			sum <= 0;
 			cout <= 0;
-			p_GG <= 0;
-			p_PP <= 0;
+			REG_GG <= 0;
+			REG_PP <= 0;
 			p_S <= 0;
 			p_C <= 0;
 
@@ -278,23 +287,10 @@ module pipe_kogge_stone_Nbit(
 			sum[bw:1] <= p_S;
 			sum[fbw:bw+1] <= aS[bw:1];
 			cout <= Co;
-			p_GG <= A[fbw:bw+1] & B[fbw:bw+1];
-			p_PP <= A[fbw:bw+1] ^ B[fbw:bw+1];
+			REG_GG <= A[fbw:bw+1] & B[fbw:bw+1];
+			REG_PP <= A[fbw:bw+1] ^ B[fbw:bw+1];
 			p_S <= S[bw:1];
-			p_GG[(bw+1)*0] <= cl; 
-			p_PP[(bw+1)*0] <= 0;
-			p_GG[(bw+1)*1] <= cl; 
-			p_PP[(bw+1)*1] <= 0;
-			p_GG[(bw+1)*2] <= cl; 
-			p_PP[(bw+1)*2] <= 0;
-			p_GG[(bw+1)*3] <= cl; 
-			p_PP[(bw+1)*3] <= 0;
-			p_GG[(bw+1)*4] <= cl; 
-			p_PP[(bw+1)*4] <= 0;
-			p_GG[(bw+1)*5] <= cl; 
-			p_PP[(bw+1)*5] <= 0;
-			p_GG[(bw+1)*6] <= cl; 
-			p_PP[(bw+1)*6] <= 0;
+			p_C <= cl;
 		end
 	 end
 
