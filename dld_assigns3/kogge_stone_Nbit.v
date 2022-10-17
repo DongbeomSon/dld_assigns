@@ -57,22 +57,92 @@ module buffer(
 	assign PPP = P;
 	
 endmodule
-	
-module kogge_stone_Nbit(
+
+module kogge_stone_Nbit_NOCLK
+	#(parameter bw = 32)
+	(
 	A,B,cin,
 	cout,sum,
-	clk, resetn
     );
-	 
-	parameter bw = 32;
-	parameter integer level = $ceil($clog2(bw+1))+1;
+	parameter integer level = $clog2(bw+1)+2;
 	//parameter integer level = 7;
 	
 	input [bw:1] A;
 	input [bw:1] B;
 	input cin;
-	input clk;
-	input resetn;
+	output cout;
+	output [bw:1] sum;
+	
+	wire Co;
+	wire [bw:1] S;
+	
+	wire [bw:1] G;
+	wire [bw:1] P;
+	
+	assign G = A & B;
+	assign P = A ^ B;
+	
+	wire [(bw+1)*level:0] GG;
+	wire [(bw+1)*level:0] PP;
+
+	
+	genvar i;
+	genvar j;
+	//(2**(i-1))
+	
+	generate
+		for(i=1; i <= level+1;i=i+1)begin:loop_init
+			assign GG[(bw+1)*(i-1)] = cin; 
+			assign PP[(bw+1)*(i-1)] = 0;
+		end
+	endgenerate
+	
+	assign GG[bw:1] = A & B;
+	assign PP[bw:1] = A ^ B;
+	
+	generate
+		for(i=1; (2**(i-1))<= bw; i=i+1) begin :loop_1
+			if(i > 1) begin
+				for(j=2**(i-2); j <= bw; j = j+1) begin : loop_2
+					if(j <=(2**(i-1)-1)) begin
+						buffer U0(GG[(i-1)*(bw+1) + j], PP[(i-1)*(bw+1) + j],GG[i*(bw+1) + j], PP[i*(bw+1) + j]);
+					end
+				end
+			end
+			for(j=(2**(i-1)); j <= bw; j = j+1) begin :loop_3
+				if(j <= (2**i -1)) begin
+					G_cell U1(GG[(i-1)*(bw+1) + j], PP[(i-1)*(bw+1) + j], GG[(i-1)*(bw+1) + j - (2**(i-1))], PP[(i-1)*(bw+1) + j - (2**(i-1))],GG[i*(bw+1) + j], PP[i*(bw+1) + j]);
+					assign sum[j] = P[j] ^ GG[i*(bw+1) + j-1];
+				end
+				else	begin
+					B_cell U2(GG[(i-1)*(bw+1) + j], PP[(i-1)*(bw+1) + j], GG[(i-1)*(bw+1) + j - (2**(i-1))], PP[(i-1)*(bw+1) + j - (2**(i-1))],GG[i*(bw+1) + j], PP[i*(bw+1) + j]);
+				end
+			end
+			
+			if(2**i > bw) begin
+				assign cout = GG[(i*(bw+1) + bw)];
+			end
+		end
+	endgenerate
+
+endmodule
+
+
+module kogge_stone_Nbit(
+	A,B,cin,
+	cout,sum,
+	CLK, RESETn
+    );
+	 
+	parameter bw = 32;
+	parameter integer level = $clog2(bw+1)+2;
+	//parameter integer level = 7;
+	
+	input [bw:1] A;
+	input [bw:1] B;
+	input cin;
+	input CLK;
+	input RESETn;
 	output reg cout;
 	output reg [bw:1] sum;
 	
@@ -92,29 +162,6 @@ module kogge_stone_Nbit(
 	genvar i;
 	genvar j;
 	//(2**(i-1))
-	
-	
-/*	generate
-		for(i=1; (2**i -1)<= bw; i=i+1) begin :loop_1
-			for(j=1; j <= bw; j = j+1) begin :loop_2
-				if(j <= (2**(i-1))) begin
-					G_cell U1(GG[(i-1)*bw + j], PP[(i-1)*bw + j], GG[(i-1)*bw + (j-(2**i))], PP[(i-1)*bw + (j-(2**i))],GG[i*bw + j], PP[i*bw + j]);
-					assign sum[2**(i-1) + (j-1)] = P[2**(i-1) + (j-1)] ^ GG[i*bw + j];
-				end
-				else	begin
-					B_cell U2(GG[(i-1)*bw + j], PP[(i-1)*bw + j], GG[(i-1)*bw + (j-(2**i))], PP[(i-1)*bw + (j-(2**i))],GG[i*bw + j], PP[i*bw + j]);
-				end
-			end
-		end
-	endgenerate*/
-/*	assign GG[0] = cin;
-	assign GG[(bw+1)] = cin;
-	assign GG[(bw+1)*2] = cin;
-	assign GG[(bw+1)*3] = cin;
-	assign PP[0] = 0;
-	assign PP[(bw+1)] = 0;
-	assign PP[(bw+1)*2] = 0;
-	assign PP[(bw+1)*3] = 0;*/
 	
 	generate
 		for(i=1; i <= level+1;i=i+1)begin:loop_init
@@ -151,8 +198,8 @@ module kogge_stone_Nbit(
 		end
 	endgenerate
 	
-	always@(posedge clk, negedge resetn) begin
-		if(!resetn) begin
+	always@(posedge CLK, negedge RESETn) begin
+		if(!RESETn) begin
 			cout <= 0;
 			sum <= 0;
 		end else begin
@@ -160,8 +207,6 @@ module kogge_stone_Nbit(
 			sum <= S;
 		end
 	end
-
-
 endmodule
 
 module pipe_kogge_stone_Nbit(
@@ -172,8 +217,8 @@ module pipe_kogge_stone_Nbit(
 	 
 	parameter bw = 16;
 	parameter fbw = 32;
-	parameter integer level = $ceil($clog2(bw+1))+1;
-	//parameter level = 6;
+	//parameter integer level = $ceil($clog2(bw+1))+1;
+	parameter level = 6;
 	
 	input [fbw:1] A;
 	input [fbw:1] B;
