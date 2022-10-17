@@ -60,3 +60,37 @@ module multiplier
 
 
 endmodule
+
+module full_adder(
+	A,B,cin,
+	sum,cout);
+	
+	input A,B,cin;
+	output sum, cout;
+	
+	assign sum = A ^ B ^ cin;
+	assign cout = (A&B) | (B&cin)|(A&cin);
+	
+endmodule
+
+module half_adder(
+	A,B,sum,cout)
+	
+	input A,B;
+	output sum, cout;
+	
+	assign sum = A^B;
+	assign cout = A&B;
+	
+endmodule
+
+module multiplier_array #(bw = 16)
+	(A, B, out, CLK, RESETn);
+	
+	input [bw:1] A, B;
+	output [2*bw:1] out;
+	
+	wire [2*bw:1] pSum [bw:1]
+	
+	
+endmodule
