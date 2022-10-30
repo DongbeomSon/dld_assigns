@@ -24,7 +24,7 @@
 
 module tb_multiplier;
 
-	parameter bw = 4;
+	parameter bw = 8;
 	// Inputs
 	reg [bw:1] A;
 	reg [bw:1] B;
@@ -37,7 +37,7 @@ module tb_multiplier;
 	reg RESETn;
 
 	// Instantiate the Unit Under Test (UUT)
-	multiplier_array #(.bw(bw)) uut(
+	multiplier_array_pipe #(.bw(bw)) uut(
 		.A(A), 
 		.B(B), 
 		.out(out),
@@ -47,8 +47,8 @@ module tb_multiplier;
 
 	initial begin
 		// Initialize Inputs
-		A = 0;
-		B = 0;
+		A = 118;
+		B = 181;
 		cin = 0;
 		
 		// Wait 100 ns for global reset to finish
