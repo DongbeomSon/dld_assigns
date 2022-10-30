@@ -146,11 +146,12 @@ module multiplier_array_pipe #(bw = 16)
 	wire [2*bw:1] sum [bw:1];
 	wire [2*bw:0] carry [bw:1];
 	
-	reg [bw:1] A_reg [bw:1];
-	reg [bw:1] B_reg [bw:1];
+	reg [bw:1] A_reg [bw:2];
+	reg [bw:1] B_reg [bw:2];
 	
-	reg [2*bw:1] sum_reg [bw:1];
-	
+	reg [2*bw:1] sum_reg [bw:2];
+
+			
 	genvar i, r, c;
 	genvar j;
 	generate
@@ -172,9 +173,7 @@ module multiplier_array_pipe #(bw = 16)
 	
 	generate
 		for(r=2; r < bw; r=r+1) begin : psum_row
-			if(r != 1) begin
-				assign pSum[r+1] = {A_reg[r]&{bw{B_reg[r][r+1]}}} << (r);
-			end
+			assign pSum[r+1] = {A_reg[r]&{bw{B_reg[r][r+1]}}} << (r);
 			
 			for(c=1; c <= 2*bw; c=c+1) begin : psum_col
 				full_adder u0(sum_reg[r][c],pSum[r+1][c],carry[r][c-1],sum[r+1][c],carry[r][c]);

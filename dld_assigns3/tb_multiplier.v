@@ -63,8 +63,9 @@ module tb_multiplier;
 	always #50 B = B + 1;
 	initial begin
 		CLK = 0;
+		RESETn = 0;
+		#50;
 		RESETn = 1;
-		#5;
 		forever #10 CLK = ~CLK;
 	end
       
