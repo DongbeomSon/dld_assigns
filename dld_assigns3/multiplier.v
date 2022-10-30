@@ -74,7 +74,7 @@ module full_adder(
 endmodule
 
 module half_adder(
-	A,B,sum,cout)
+	A,B,sum,cout);
 	
 	input A,B;
 	output sum, cout;
@@ -84,13 +84,45 @@ module half_adder(
 	
 endmodule
 
+
 module multiplier_array #(bw = 16)
 	(A, B, out, CLK, RESETn);
 	
 	input [bw:1] A, B;
+	input CLK, RESETn;
 	output [2*bw:1] out;
 	
-	wire [2*bw:1] pSum [bw:1]
+	wire [2*bw:1] pSum [bw:1];
 	
+	wire [2*bw:1] sum [bw:1];
+	wire [2*bw:0] carry [bw:1];
+	
+	genvar i;
+	generate
+		for(i=1; i <= bw; i=i+1) begin: gen
+			assign pSum[i] = {A&{bw{B[i]}}} << (i-1);
+		end
+	endgenerate
+	
+	genvar j;
+	generate
+		for(j = 1; j <= bw; j = j+1) begin: tmp
+			assign carry[j][0] = 1'b0;
+		end
+	endgenerate
+	
+	assign sum[1] = pSum[1];
+	
+	genvar r, c;
+	generate
+		for(r=1; r < bw; r=r+1) begin : psum_row
+			for(c=1; c <= 2*bw; c=c+1) begin : psum_col
+				full_adder u0(sum[r][c],pSum[r+1][c],carry[r][c-1],sum[r+1][c],carry[r][c]);
+			end
+		end
+	endgenerate
+	
+	assign out = sum[bw];
 	
 endmodule
+

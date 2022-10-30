@@ -24,7 +24,7 @@
 
 module tb_multiplier;
 
-	parameter bw = 64;
+	parameter bw = 4;
 	// Inputs
 	reg [bw:1] A;
 	reg [bw:1] B;
@@ -37,7 +37,7 @@ module tb_multiplier;
 	reg RESETn;
 
 	// Instantiate the Unit Under Test (UUT)
-	multiplier #(.bw(bw)) uut(
+	multiplier_array #(.bw(bw)) uut(
 		.A(A), 
 		.B(B), 
 		.out(out),
