@@ -24,7 +24,7 @@
 
 module tb_multiplier;
 
-	parameter bw = 8;
+	parameter bw = 4;
 	// Inputs
 	reg [bw:1] A;
 	reg [bw:1] B;
@@ -47,8 +47,8 @@ module tb_multiplier;
 
 	initial begin
 		// Initialize Inputs
-		A = 118;
-		B = 181;
+		A = 1;
+		B = 1;
 		cin = 0;
 		
 		// Wait 100 ns for global reset to finish

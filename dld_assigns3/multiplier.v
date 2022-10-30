@@ -151,9 +151,7 @@ module multiplier_array_pipe #(bw = 16)
 	
 	reg [2*bw:0] sum_reg [bw:1];
 	
-	assign A_reg[1] = A;
-	assign B_reg[1] = B;
-	
+	genvar i, r, c;
 	genvar j;
 	generate
 		for(j = 1; j <= bw; j = j+1) begin: tmp
@@ -161,20 +159,26 @@ module multiplier_array_pipe #(bw = 16)
 		end
 	endgenerate
 	
+	for(i=1; i <= 2; i=i+1) begin :pSumgen
+			assign pSum[i] = {A&{bw{B[i]}}} << (i-1);
+		end
+	assign sum[1] = pSum[1];
 	
-	genvar i, r, c;
+	for(c=1; c<=2*bw; c=c+1) begin :psum_col_0
+		full_adder u0(sum[1][c],pSum[2][c],carry[1][c-1],sum[2][c],carry[1][c]);
+	end
+	
 	generate
-		for(r=1; r < bw; r=r+1) begin : psum_row
-			for(i=0; i < 2; i=i+1) begin :pSumgen
-				assign pSum[i] = {A_reg[r]&{bw{B_reg[r][r+i]}}} << (r+i-1);
+		for(r=2; r < bw; r=r+1) begin : psum_row
+			if(r != 1) begin
+				assign pSum[r+1] = {A_reg[r]&{bw{B_reg[r][r+1]}}} << (r);
 			end
-			if(r == 1) assign sum[r] = pSum[r];
+			
 			for(c=1; c <= 2*bw; c=c+1) begin : psum_col
 				full_adder u0(sum_reg[r][c],pSum[r+1][c],carry[r][c-1],sum[r+1][c],carry[r][c]);
 			end
 		end
 	endgenerate
-	
 	
 	generate
 		for(i=1; i<=bw; i=i+1) begin:ain
@@ -188,8 +192,20 @@ module multiplier_array_pipe #(bw = 16)
 		end
 	endgenerate
 	
+
+	
+	always@(posedge CLK, negedge RESETn) begin
+		if(!RESETn) begin
+			out <= 0;
+		end else begin
+			out <= sum[bw];
+			A_reg[2] <= A;
+			B_reg[2] <= B;
+		end
+	end
+	
 	generate
-		for(i=1; i<bw; i=i+1) begin:ain2
+		for(i=2; i<bw; i=i+1) begin:ain2
 			always@(posedge CLK) begin
 				sum_reg[i] <= sum[i];
 				A_reg[i+1] <= A_reg[i];
@@ -197,14 +213,6 @@ module multiplier_array_pipe #(bw = 16)
 			end
 		end
 	endgenerate
-	
-	always@(posedge CLK, negedge RESETn) begin
-		if(!RESETn) begin
-			out <= 0;
-		end else begin
-			out <= sum[bw];
-		end
-	end
 	
 	
 endmodule
