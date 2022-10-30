@@ -24,7 +24,7 @@
 
 module tb_multiplier;
 
-	parameter bw = 4;
+	parameter bw = 8;
 	// Inputs
 	reg [bw:1] A;
 	reg [bw:1] B;

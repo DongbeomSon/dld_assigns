@@ -149,7 +149,7 @@ module multiplier_array_pipe #(bw = 16)
 	reg [bw:1] A_reg [bw:1];
 	reg [bw:1] B_reg [bw:1];
 	
-	reg [2*bw:0] sum_reg [bw:1];
+	reg [2*bw:1] sum_reg [bw:1];
 	
 	genvar i, r, c;
 	genvar j;
@@ -159,14 +159,16 @@ module multiplier_array_pipe #(bw = 16)
 		end
 	endgenerate
 	
-	for(i=1; i <= 2; i=i+1) begin :pSumgen
-			assign pSum[i] = {A&{bw{B[i]}}} << (i-1);
-		end
-	assign sum[1] = pSum[1];
+	generate
+		for(i=1; i <= 2; i=i+1) begin :pSumgen
+				assign pSum[i] = {A&{bw{B[i]}}} << (i-1);
+			end
+		assign sum[1] = pSum[1];
 	
-	for(c=1; c<=2*bw; c=c+1) begin :psum_col_0
-		full_adder u0(sum[1][c],pSum[2][c],carry[1][c-1],sum[2][c],carry[1][c]);
-	end
+		for(c=1; c<=2*bw; c=c+1) begin :psum_col_0
+			full_adder u0(sum[1][c],pSum[2][c],carry[1][c-1],sum[2][c],carry[1][c]);
+		end
+	endgenerate
 	
 	generate
 		for(r=2; r < bw; r=r+1) begin : psum_row
