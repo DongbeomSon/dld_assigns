@@ -85,7 +85,7 @@ module half_adder(
 endmodule
 
 
-module multiplier_array #(bw = 16)
+module multiplier_array #(parameter bw = 16)
 	(A, B, out, CLK, RESETn);
 	
 	input [bw:1] A, B;
@@ -134,9 +134,8 @@ endmodule
 
 
 
-module multiplier_array_pipe #(bw = 16)
+module multiplier_array_pipe #(parameter bw = 16)
 	(A, B, out, CLK, RESETn);
-	
 	input [bw:1] A, B;
 	input CLK, RESETn;
 	output reg [2*bw:1] out;
@@ -146,10 +145,10 @@ module multiplier_array_pipe #(bw = 16)
 	wire [2*bw:1] sum [bw:1];
 	wire [2*bw:0] carry [bw:1];
 	
-	reg [bw:1] A_reg [bw:2];
-	reg [bw:1] B_reg [bw:2];
+	reg [bw:1] A_reg [bw:1];
+	reg [bw:1] B_reg [bw:1];
 	
-	reg [2*bw:1] sum_reg [bw:2];
+	reg [2*bw:1] sum_reg [bw:1];
 
 			
 	genvar i, r, c;
@@ -162,7 +161,7 @@ module multiplier_array_pipe #(bw = 16)
 	
 	generate
 		for(i=1; i <= 2; i=i+1) begin :pSumgen
-				assign pSum[i] = {A&{bw{B[i]}}} << (i-1);
+				assign pSum[i] = {A_reg[1]&{bw{B_reg[1][i]}}} << (i-1);
 			end
 		assign sum[1] = pSum[1];
 	
@@ -183,38 +182,29 @@ module multiplier_array_pipe #(bw = 16)
 	
 	generate
 		for(i=1; i<=bw; i=i+1) begin:ain
-			always@(negedge RESETn) begin
+			always@(posedge CLK, negedge RESETn) begin
 				if(!RESETn) begin
+					if(i==1) begin
+						out <= 0;
+					end
 					A_reg[i] <= 0;
 					B_reg[i] <= 0;
 					sum_reg[i] <= 0;
+				end else begin
+					if(i==1) begin
+						out <= sum_reg[bw];
+						A_reg[1] <= A;
+						B_reg[1] <= B;
+					end
+					if(i>1) begin
+						sum_reg[i] <= sum[i];
+						A_reg[i] <= A_reg[i-1];
+						B_reg[i] <= B_reg[i-1];
+					end
 				end
 			end
 		end
 	endgenerate
-	
-
-	
-	always@(posedge CLK, negedge RESETn) begin
-		if(!RESETn) begin
-			out <= 0;
-		end else begin
-			out <= sum[bw];
-			A_reg[2] <= A;
-			B_reg[2] <= B;
-		end
-	end
-	
-	generate
-		for(i=2; i<bw; i=i+1) begin:ain2
-			always@(posedge CLK) begin
-				sum_reg[i] <= sum[i];
-				A_reg[i+1] <= A_reg[i];
-				B_reg[i+1] <= B_reg[i];
-			end
-		end
-	endgenerate
-	
 	
 endmodule
 
