@@ -22,17 +22,17 @@
 // 
 ////////////////////////////////////////////////////////////////////////////////
 
-module tb_karastuba_12bit;
+module tb_karastuba_10bit;
 
 	// Inputs
-	reg [11:0] a;
-	reg [11:0] b;
+	reg [9:0] a;
+	reg [9:0] b;
 
 	// Outputs
-	wire [23:0] out;
+	wire [19:0] out;
 
 	// Instantiate the Unit Under Test (UUT)
-	karastuba_12bit uut (
+	karastuba_10bit uut (
 		.a(a), 
 		.b(b), 
 		.out(out)
@@ -40,8 +40,8 @@ module tb_karastuba_12bit;
 
 	initial begin
 		// Initialize Inputs
-		a = 12'd1460;
-		b = 12'd1156;
+		a = 10'd996;
+		b = 10'd999;
 
 		// Wait 100 ns for global reset to finish
 		#50000;
