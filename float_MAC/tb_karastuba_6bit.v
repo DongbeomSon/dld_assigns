@@ -45,7 +45,7 @@ module tb_karastuba_6bit;
 
 		// Wait 100 ns for global reset to finish
 		#50000;
-		$finish;
+		$finish
 		// Add stimulus here
 
 	end

@@ -175,7 +175,12 @@ module biasAdder(
 	);
 	input [4:0] A,B;
 	output [4:0] out;
-	assign out = A+B-5'b01111;
+	
+
+	wire [4:0]temp;
+	
+	RCA #(.bw(5)) badder1(A,B,0,temp);
+	RCA #(.bw(5)) badder2(temp,5'b10000,1,out);
 	
 endmodule
 
@@ -269,13 +274,14 @@ module karastuba_12bit(
 	input [11:0] a,b;
 	output [23:0] out;
 	
-	wire [5:0] a1, ar;
-	wire [5:0] b1, br;
+	wire [6:0] a1, ar;
+	wire [6:0] b1, br;
 	
-	wire [11:0] xy, r;
-	wire [11:0] mid, mid2, mid3;
+	wire [13:0] xy, r;
+	wire [13:0] mid;
+	wire [13:0] mid2, mid3;
 	
-	wire [5:0] tsum[1:0];
+	wire [6:0] tsum[1:0];
 	
 	assign a1 = {0,a[11:6]};
 	assign ar = {0,a[5:0]};
@@ -283,27 +289,40 @@ module karastuba_12bit(
 	assign b1 = {0,b[11:6]};
 	assign br = {0,b[5:0]};
 	
-	karastuba_6bit km0(a1, b1, xy);
-	karastuba_6bit km1(ar, br, r);
+	wire [11:0] mxy,mr;
 	
-	RCA #(.bw(6)) rca1(a1, ar, 0, tsum[0]);
-	RCA #(.bw(6)) rca2(b1, br, 0, tsum[1]);
+	karastuba_6bit km0(a1, b1, mxy);
+	karastuba_6bit km1(ar, br, mr);
 	
-	karastuba_6bit km2(tsum[0], tsum[1], mid);
+	assign xy = {0,mxy};
+	assign r = {0,mr};
 	
-	RCA #(.bw(12)) sub1(mid, ~xy, 1, mid2);
-	RCA #(.bw(12)) sub2(mid2, ~r, 1, mid3);
+	RCA #(.bw(7)) rca1(a1, ar, 0, tsum[0]);
+	RCA #(.bw(7)) rca2(b1, br, 0, tsum[1]);
+	
+	//7bit multiplier가 필요하다는 이유가 있음 이에 대한 수정 필요
+	wire [11:0] mout;
+	karastuba_6bit km2(tsum[0], tsum[1], mout);
+	
+	assign mid={0,mout};
+	
+	RCA #(.bw(14)) sub1(mid, ~xy, 1, mid2);
+	RCA #(.bw(14)) sub2(mid2, ~r, 1, mid3);
+	//RCA #(.bw(14)) addsub({0,xy},{0,r},0,mid2);
+	//RCA #(.bw(13)) sub({0,mid},~mid2,1,mid3, sign);
+	
 	
 	wire [23:0] t1, t2, t3;
 	
 	assign t1 = {0, xy, 12'b0};
-	assign t2 = {0, mid3, 6'b0};
+	assign t2 = {mid3[13], mid3, 6'b0};
 	assign t3 = r;
 	
 	wire [23:0] psum;
 	
 	RCA #(.bw(24)) add1(t1,t2,0, psum);
 	RCA #(.bw(24)) add2(psum,t3,0, out);
+	
 
 endmodule
 
@@ -315,17 +334,17 @@ module menMult(
 	input [9:0] a,b;
 	output [9:0] out;
 	
-	wire [19:0] multi;
+	wire [23:0] multi;
 	
 	wire [11:0] a12, b12;
 	
 	assign a12 = {a,2'b0};
 	assign b12 = {b,2'b0};
 	
-	karastuba_12bit(a12,b12,multi);
+	karastuba_12bit menti(a12,b12,multi);
 	
 	//need rounding
-	assign out = multi[19:10];
+	assign out = multi[23:14];
 	
 	
 //	assign out = 0;

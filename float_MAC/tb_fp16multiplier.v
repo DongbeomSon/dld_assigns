@@ -44,11 +44,40 @@ module tb_fp16multiplier;
 
 	initial begin
 		// Initialize Inputs
-		A = 16'b1010100000000000;
-		B = 16'b0000110000000000;
+	A = 16'b1100011010010101;
+	B = 16'b1011100110011010;
+	#200
+	A = 16'h0xd11d;
+	B = 16'h0x599a;
+	#200
+	A = 16'h0xd2b4;
+	B = 16'h0x5804;
+	#200
+	A = 16'h0x5311;
+	B = 16'h0x5999;
+	#200
+	A = 16'h0x4e56;
+	B = 16'h0x5783;
+	#200
+	A = 16'h0x596d;
+	B = 16'h0xd521;
+	#200
+	A = 16'h0xce4c;
+	B = 16'h0xd448;
+	#200
+	A = 16'h0xd049;
+	B = 16'h0xd426;
+	#200
+	A = 16'h0xd199;
+	B = 16'h0x5450;
+	#200
+	A = 16'h0x5777;
+	B = 16'h0x57ad;
+	#200
+
 		
 		// Wait 100 ns for global reset to finish
-		#100;
+		#100000;
         		
 		$finish;
 		// Add stimulus here

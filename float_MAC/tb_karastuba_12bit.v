@@ -40,8 +40,8 @@ module tb_karastuba_12bit;
 
 	initial begin
 		// Initialize Inputs
-		a = 12'b001100;
-		b = 12'b010010;
+		a = 12'd1460;
+		b = 12'd1156;
 
 		// Wait 100 ns for global reset to finish
 		#50000;
@@ -50,8 +50,8 @@ module tb_karastuba_12bit;
 
 	end
 	
-	always #50 a=a+11;
-	always #50 b=b+21;
+	always #50 a=a+4;
+	always #50 b=b+4;
       
 endmodule
 
