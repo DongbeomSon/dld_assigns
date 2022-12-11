@@ -4,15 +4,15 @@
 // Company: 
 // Engineer:
 //
-// Create Date:   06:43:36 12/11/2022
-// Design Name:   vedic_4bit
-// Module Name:   C:/Users/Dongbeom Son/Desktop/repos/dld_assigns/float_MAC/tb_verdic.v
+// Create Date:   16:59:27 12/11/2022
+// Design Name:   karastuba_12bit
+// Module Name:   C:/Users/Dongbeom Son/Desktop/repos/dld_assigns/float_MAC/tb_karastuba_12bit.v
 // Project Name:  float_MAC
 // Target Device:  
 // Tool versions:  
 // Description: 
 //
-// Verilog Test Fixture created by ISE for module: vedic_4bit
+// Verilog Test Fixture created by ISE for module: karastuba_12bit
 //
 // Dependencies:
 // 
@@ -22,17 +22,17 @@
 // 
 ////////////////////////////////////////////////////////////////////////////////
 
-module tb_verdic;
+module tb_karastuba_12bit;
 
 	// Inputs
-	reg [3:0] a;
-	reg [3:0] b;
+	reg [11:0] a;
+	reg [11:0] b;
 
 	// Outputs
-	wire [7:0] out;
+	wire [23:0] out;
 
 	// Instantiate the Unit Under Test (UUT)
-	vedic_4bit uut (
+	karastuba_12bit uut (
 		.a(a), 
 		.b(b), 
 		.out(out)
@@ -40,18 +40,18 @@ module tb_verdic;
 
 	initial begin
 		// Initialize Inputs
-		a = 4'b1111;
-		b = 4'b1111;
+		a = 12'b001100;
+		b = 12'b010010;
 
 		// Wait 100 ns for global reset to finish
-		#500;
-        		
+		#50000;
 		$finish;
-	end
-        
 		// Add stimulus here
 
+	end
 	
+	always #50 a=a+11;
+	always #50 b=b+21;
       
 endmodule
 

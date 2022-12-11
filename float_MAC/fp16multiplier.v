@@ -19,7 +19,10 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 
+
+
 module RCA #(parameter bw = 4)(A, B, Cin, Sum, Cout);
+	//can be subsitude with other adder to recude delay
 	input [bw:1] A;
 	input [bw:1] B;
 	input Cin;
@@ -206,20 +209,126 @@ module vedic_4bit(
 	
 endmodule
 
-module menMult(
-	A,B,
+
+
+
+
+module karastuba_6bit(
+	a, b,
+	out);
+	
+	input [5:0] a,b;
+	output [11:0] out;
+	
+	
+	wire [3:0] a1, ar;
+	wire [3:0] b1, br;
+	
+	
+	wire [7:0] xy, r, mid, mid2, mid3;
+	wire [3:0] xr1, xr2;
+	
+	wire [3:0] tsum[1:0];
+	
+	assign a1 = {0,a[5:3]};
+	assign ar = {0,a[2:0]};
+	
+	assign b1 = {0,b[5:3]};
+	assign br = {0,b[2:0]};
+	
+	vedic_4bit u0(a1, b1, xy);
+	vedic_4bit u1(ar, br, r);
+	
+	RCA #(.bw(4)) rca1(a1, ar, 0, tsum[0]);
+	RCA #(.bw(4)) rca2(b1, br, 0, tsum[1]);
+	
+	vedic_4bit u2(tsum[0], tsum[1], mid);
+	
+	RCA #(.bw(8)) sub1(mid, ~xy, 1, mid2);
+	RCA #(.bw(8)) sub2(mid2, ~r, 1, mid3);
+	
+	wire [11:0] t1, t2, t3;
+	
+	assign t1 = {0, xy, 6'b000000};
+	assign t2 = {0, mid3, 3'b000};
+	assign t3 = r;
+	
+	wire [11:0] psum;
+	
+	RCA #(.bw(12)) add1(t1,t2,0, psum);
+	RCA #(.bw(12)) add2(psum,t3,0, out);
+	
+
+endmodule
+	
+module karastuba_12bit(
+	a,b,
 	out
 	);
 	
-	input [9:0] A,B;
+	input [11:0] a,b;
+	output [23:0] out;
+	
+	wire [5:0] a1, ar;
+	wire [5:0] b1, br;
+	
+	wire [11:0] xy, r;
+	wire [11:0] mid, mid2, mid3;
+	
+	wire [5:0] tsum[1:0];
+	
+	assign a1 = {0,a[11:6]};
+	assign ar = {0,a[5:0]};
+	
+	assign b1 = {0,b[11:6]};
+	assign br = {0,b[5:0]};
+	
+	karastuba_6bit km0(a1, b1, xy);
+	karastuba_6bit km1(ar, br, r);
+	
+	RCA #(.bw(6)) rca1(a1, ar, 0, tsum[0]);
+	RCA #(.bw(6)) rca2(b1, br, 0, tsum[1]);
+	
+	karastuba_6bit km2(tsum[0], tsum[1], mid);
+	
+	RCA #(.bw(12)) sub1(mid, ~xy, 1, mid2);
+	RCA #(.bw(12)) sub2(mid2, ~r, 1, mid3);
+	
+	wire [23:0] t1, t2, t3;
+	
+	assign t1 = {0, xy, 12'b0};
+	assign t2 = {0, mid3, 6'b0};
+	assign t3 = r;
+	
+	wire [23:0] psum;
+	
+	RCA #(.bw(24)) add1(t1,t2,0, psum);
+	RCA #(.bw(24)) add2(psum,t3,0, out);
+
+endmodule
+
+module menMult(
+	a,b,
+	out
+	);
+	
+	input [9:0] a,b;
 	output [9:0] out;
 	
 	wire [19:0] multi;
 	
+	wire [11:0] a12, b12;
+	
+	assign a12 = {a,2'b0};
+	assign b12 = {b,2'b0};
+	
+	karastuba_12bit(a12,b12,multi);
+	
+	//need rounding
+	assign out = multi[19:10];
 	
 	
-	
-	assign out = 0;
+//	assign out = 0;
 	
 endmodule
 
