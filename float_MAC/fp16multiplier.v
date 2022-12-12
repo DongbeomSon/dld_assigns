@@ -76,7 +76,7 @@ module Adder3(
 	output [1:0] msb;
 	
 	
-	wire [1:0] pSum [2:0];
+	wire [2:0] pSum [1:0];
 	wire [2:0] out;
 	wire carry;
 
@@ -88,8 +88,8 @@ module Adder3(
 	full_adder u2(1'b0,add[1],pSum[0][1],pSum[1][1],pSum[1][2]);
 	
 	//RCA
-	full_adder u3(pSum[1][1],pSum[1][0],1'b0,out[1],carry);
-	full_adder u4(carry,pSum[1][2],1'b0,out[2]);
+	full_adder u3(.A(pSum[1][1]), .B(pSum[1][0]), .cin(1'b0),.sum(out[1]), .cout(carry));
+	full_adder u4(.A(carry),.B(pSum[1][2]),.cin(1'b0),.sum(out[2]),.cout());
 	
 	assign lsb = out[0];
 	assign msb = out[2:1];
@@ -181,8 +181,8 @@ module biasAdder(
 
 	wire [4:0]temp;
 	
-	RCA #(.bw(5)) badder1(A,B,shift,temp);
-	RCA #(.bw(5)) badder2(temp,5'b10000,1'b1,out);
+	RCA #(.bw(5)) badder1(.A(A),.B(B),.Cin(shift),.Sum(temp),.Cout());
+	RCA #(.bw(5)) badder2(.A(temp),.B(5'b10000),.Cin(1'b1),.Sum(out),.Cout());
 	
 endmodule
 
@@ -246,13 +246,13 @@ module karastuba_6bit(
 	vedic_4bit u0(a1, b1, xy);
 	vedic_4bit u1(ar, br, r);
 	
-	RCA #(.bw(4)) rca1(a1, ar, 1'b0, tsum[0]);
-	RCA #(.bw(4)) rca2(b1, br, 1'b0, tsum[1]);
+	RCA #(.bw(4)) rca1(.A(a1), .B(ar), .Cin(1'b0), .Sum(tsum[0]),.Cout());
+	RCA #(.bw(4)) rca2(.A(b1), .B(br), .Cin(1'b0), .Sum(tsum[1]),.Cout());
 	
 	vedic_4bit u2(tsum[0], tsum[1], mid);
 	
-	RCA #(.bw(8)) sub1(mid, ~xy, 1'b1, mid2);
-	RCA #(.bw(8)) sub2(mid2, ~r, 1'b1, mid3);
+	RCA #(.bw(8)) sub1(.A(mid), .B(~xy), .Cin(1'b1), .Sum(mid2), .Cout());
+	RCA #(.bw(8)) sub2(.A(mid2), .B(~r), .Cin(1'b1), .Sum(mid3), .Cout());
 	
 	wire [11:0] t1, t2, t3;
 	
@@ -262,8 +262,8 @@ module karastuba_6bit(
 	
 	wire [11:0] psum;
 	
-	RCA #(.bw(12)) add1(t1,t2,1'b0, psum);
-	RCA #(.bw(12)) add2(psum,t3,1'b0, out);
+	RCA #(.bw(12)) add1(.A(t1),.B(t2),.Cin(1'b0), .Sum(psum), .Cout());
+	RCA #(.bw(12)) add2(.A(psum), .B(t3), .Cin(1'b0), .Sum(out), .Cout());
 	
 
 endmodule
@@ -294,8 +294,8 @@ module karastuba_10bit(
 	karastuba_6bit km0(a1, b1, xy);
 	karastuba_6bit km1(ar, br, r);
 	
-	RCA #(.bw(6)) rca1(a1, ar, 0, tsum[0]);
-	RCA #(.bw(6)) rca2(b1, br, 0, tsum[1]);
+	RCA #(.bw(6)) rca1(.A(a1), .B(ar), .Cin(1'b0), .Sum(tsum[0]), .Cout());
+	RCA #(.bw(6)) rca2(.A(b1), .B(br), .Cin(1'b0), .Sum(tsum[1]), .Cout());
 	
 	//7bit multiplier가 필요하다는 이유가 있음 이에 대한 수정 필요
 	wire [11:0] mout;
@@ -303,8 +303,8 @@ module karastuba_10bit(
 	
 	//assign mid={0,mout};
 	
-	RCA #(.bw(12)) sub1(mid, ~xy, 1, mid2);
-	RCA #(.bw(12)) sub2(mid2, ~r, 1, mid3);
+	RCA #(.bw(12)) sub1(.A(mid), .B(~xy), .Cin(1'b1), .Sum(mid2), .Cout());
+	RCA #(.bw(12)) sub2(.A(mid2), .B(~r), .Cin(1'b1), .Sum(mid3), .Cout());
 	//RCA #(.bw(14)) addsub({0,xy},{0,r},0,mid2);
 	//RCA #(.bw(13)) sub({0,mid},~mid2,1,mid3, sign);
 	
@@ -317,8 +317,8 @@ module karastuba_10bit(
 	
 	wire [19:0] psum;
 	
-	RCA #(.bw(24)) add1(t1,t2,0, psum);
-	RCA #(.bw(24)) add2(psum,t3,0, out);
+	RCA #(.bw(24)) add1(.A(t1),.B(t2),.Cin(1'b0), .Sum(psum), .Cout());
+	RCA #(.bw(24)) add2(.A(psum), .B(t3), .Cin(1'b0), .Sum(out), .Cout());
 	
 
 endmodule
@@ -361,8 +361,8 @@ module karastuba_12bit(
 	
 	wire [23:0] psum;
 	
-	RCA #(.bw(24)) add1(t1,t3,1'b0, psum);
-	RCA #(.bw(24)) add2(psum,t2,1'b0, out);
+	RCA #(.bw(24)) add1(.A(t1),.B(t3),.Cin(1'b0), .Sum(psum), .Cout());
+	RCA #(.bw(24)) add2(.A(psum),.B(t2),.Cin(1'b0), .Sum(out), .Cout());
 	
 endmodule
 
