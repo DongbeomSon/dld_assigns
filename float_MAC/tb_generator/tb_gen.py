@@ -7,6 +7,8 @@ ex = []
 
 f = open('tb.txt','w')
 g = open('ans.txt','w')
+h = open('ans_add.txt', 'w')
+
 for idx in range(genNum):
     x_f32 = random.uniform(-100,200)
     a = np.float16(x_f32)
@@ -24,5 +26,10 @@ for idx in range(genNum):
     t = bin(np.float16(c).view('H'))[2:].zfill(16)
     g.write(hex(int(t, 2)) + "\n")
 
+    c = a+b
+    t = bin(np.float16(c).view('H'))[2:].zfill(16)
+    h.write(hex(int(t, 2)) + "\n")
+
 f.close()
 g.close()
+h.close()
