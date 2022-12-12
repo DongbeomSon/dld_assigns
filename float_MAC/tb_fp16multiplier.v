@@ -78,7 +78,7 @@ module tb_fp16multiplier;
 
 		
 		// Wait 100 ns for global reset to finish
-		#5000000;
+		#5000;
         		
 		$finish;
 		// Add stimulus here

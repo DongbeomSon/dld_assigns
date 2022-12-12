@@ -41,8 +41,9 @@ module RCA #(parameter bw = 4)(A, B, Cin, Sum, Cout);
 	assign GG[0] = G[0];
 	G_Cell U0(G[0], G[1], P[1], GG[1]);
 	
+	genvar i;
 	generate
-		for(genvar i=1; i<=bw; i=i+1) begin: loop_1
+		for(i=1; i<=bw; i=i+1) begin: loop_1
 			if(i<bw)
 				G_Cell U1(GG[i], G[i+1], P[i+1], GG[i+1]);
 			assign Sum[i] = P[i] ^ GG[i-1];
@@ -72,7 +73,7 @@ module Adder3(
 	input [1:0] add;
 	
 	output lsb;
-	output [2:0] msb;
+	output [1:0] msb;
 	
 	
 	wire [1:0] pSum [2:0];
@@ -84,11 +85,11 @@ module Adder3(
 	
 	//stage2
 	full_adder u1(d,add[0],pSum[0][0],out[0],pSum[1][0]);
-	full_adder u2(0,add[1],pSum[0][1],pSum[1][1],pSum[1][2]);
+	full_adder u2(1'b0,add[1],pSum[0][1],pSum[1][1],pSum[1][2]);
 	
 	//RCA
-	full_adder u3(pSum[1][1],pSum[1][0],0,out[1],carry);
-	full_adder u4(carry,pSum[1][2],0,out[2]);
+	full_adder u3(pSum[1][1],pSum[1][0],1'b0,out[1],carry);
+	full_adder u4(carry,pSum[1][2],1'b0,out[2]);
 	
 	assign lsb = out[0];
 	assign msb = out[2:1];
@@ -111,8 +112,8 @@ module Adder2(
 	wire [1:0] carry;
 	
 	full_adder u0(a,b,c,temp[0],carry[0]);
-	full_adder u1(add,temp[0],0,sum[0],carry[1]);
-	full_adder u2(carry[0],carry[1],0,sum[1],sum[2]);
+	full_adder u1(add,temp[0],1'b0,sum[0],carry[1]);
+	full_adder u2(carry[0],carry[1],1'b0,sum[1],sum[2]);
 	
 	assign lsb = sum[0];
 	assign msb[1:0] = sum[2:1];
@@ -136,7 +137,7 @@ module Adder4(
 	wire [1:0] carry;
 	
 	full_adder u0(a,b,c,temp[0],temp[1]);
-	full_adder u1(temp[0],add[0],0,sum[0],carry[0]);
+	full_adder u1(temp[0],add[0],1'b0,sum[0],carry[0]);
 	full_adder u2(temp[1],add[1],carry[0],sum[1],sum[2]);
 	
 	assign lsb = sum[0];
@@ -161,7 +162,7 @@ module Adder5(
 	wire [1:0] carry;
 	
 	full_adder u0(a,b,add[0],sum[0],carry[0]);
-	full_adder u1(add[1],carry[0],0,sum[1],sum[2]);
+	full_adder u1(add[1],carry[0],1'b0,sum[1],sum[2]);
 	
 	assign lsb = sum[0];
 	assign msb[1:0] = sum[2:1];
@@ -181,7 +182,7 @@ module biasAdder(
 	wire [4:0]temp;
 	
 	RCA #(.bw(5)) badder1(A,B,shift,temp);
-	RCA #(.bw(5)) badder2(temp,5'b10000,1,out);
+	RCA #(.bw(5)) badder2(temp,5'b10000,1'b1,out);
 	
 endmodule
 
@@ -197,7 +198,7 @@ module vedic_4bit(
 	
 	assign pSum[0] = a[0]&b[0];
 	
-	full_adder adder1(a[0]&b[1],a[1]&b[0],0,pSum[1],add[1][0]);
+	full_adder adder1(a[0]&b[1],a[1]&b[0],1'b0,pSum[1],add[1][0]);
 	
 	Adder2 adder2(a[0]&b[2], a[1]&b[1], a[2]&b[0], add[1][0], pSum[2], add[2]);
 	
@@ -236,33 +237,33 @@ module karastuba_6bit(
 	
 	wire [3:0] tsum[1:0];
 	
-	assign a1 = {0,a[5:3]};
-	assign ar = {0,a[2:0]};
+	assign a1 = {1'b0,a[5:3]};
+	assign ar = {1'b0,a[2:0]};
 	
-	assign b1 = {0,b[5:3]};
-	assign br = {0,b[2:0]};
+	assign b1 = {1'b0,b[5:3]};
+	assign br = {1'b0,b[2:0]};
 	
 	vedic_4bit u0(a1, b1, xy);
 	vedic_4bit u1(ar, br, r);
 	
-	RCA #(.bw(4)) rca1(a1, ar, 0, tsum[0]);
-	RCA #(.bw(4)) rca2(b1, br, 0, tsum[1]);
+	RCA #(.bw(4)) rca1(a1, ar, 1'b0, tsum[0]);
+	RCA #(.bw(4)) rca2(b1, br, 1'b0, tsum[1]);
 	
 	vedic_4bit u2(tsum[0], tsum[1], mid);
 	
-	RCA #(.bw(8)) sub1(mid, ~xy, 1, mid2);
-	RCA #(.bw(8)) sub2(mid2, ~r, 1, mid3);
+	RCA #(.bw(8)) sub1(mid, ~xy, 1'b1, mid2);
+	RCA #(.bw(8)) sub2(mid2, ~r, 1'b1, mid3);
 	
 	wire [11:0] t1, t2, t3;
 	
-	assign t1 = {0, xy, 6'b000000};
-	assign t2 = {0, mid3, 3'b000};
+	assign t1 = {xy, 6'b0};
+	assign t2 = {3'b0, mid3, 3'b0};
 	assign t3 = r;
 	
 	wire [11:0] psum;
 	
-	RCA #(.bw(12)) add1(t1,t2,0, psum);
-	RCA #(.bw(12)) add2(psum,t3,0, out);
+	RCA #(.bw(12)) add1(t1,t2,1'b0, psum);
+	RCA #(.bw(12)) add2(psum,t3,1'b0, out);
 	
 
 endmodule
@@ -284,11 +285,11 @@ module karastuba_10bit(
 	
 	wire [5:0] tsum[1:0];
 	
-	assign a1 = {0, a[9:5]};
-	assign ar = {0, a[4:0]};
+	assign a1 = {1'b0, a[9:5]};
+	assign ar = {1'b0, a[4:0]};
 	
-	assign b1 = {0, b[9:5]};
-	assign br = {0, b[4:0]};
+	assign b1 = {1'b0, b[9:5]};
+	assign br = {1'b0, b[4:0]};
 	
 	karastuba_6bit km0(a1, b1, xy);
 	karastuba_6bit km1(ar, br, r);
@@ -310,8 +311,8 @@ module karastuba_10bit(
 	
 	wire [19:0] t1, t2, t3;
 	
-	assign t1 = {0, xy, 10'b0};
-	assign t2 = {0, mid3, 5'b0};
+	assign t1 = {xy, 10'b0};
+	assign t2 = {5'b0, mid3, 5'b0};
 	assign t3 = r;
 	
 	wire [19:0] psum;
@@ -350,18 +351,18 @@ module karastuba_12bit(
 	karastuba_6bit km2(a1, br, x1);
 	karastuba_6bit km3(ar, b1, x2);
 	
-	RCA #(.bw(12)) rca1(x1, x2, 0, tsum[11:0],tsum[12]);
+	RCA #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
 	
 	wire [23:0] t1, t2, t3;
 	
-	assign t1 = {0, xy, 12'b0};
-	assign t2 = {0, tsum, 6'b0};
+	assign t1 = {xy, 12'b0};
+	assign t2 = {6'b0, tsum, 6'b0};
 	assign t3 = r;
 	
 	wire [23:0] psum;
 	
-	RCA #(.bw(24)) add1(t1,t3,0, psum);
-	RCA #(.bw(24)) add2(psum,t2,0, out);
+	RCA #(.bw(24)) add1(t1,t3,1'b0, psum);
+	RCA #(.bw(24)) add2(psum,t2,1'b0, out);
 	
 endmodule
 
