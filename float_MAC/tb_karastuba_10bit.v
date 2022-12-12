@@ -4,9 +4,9 @@
 // Company: 
 // Engineer:
 //
-// Create Date:   18:32:14 12/12/2022
+// Create Date:   16:59:27 12/11/2022
 // Design Name:   karastuba_12bit
-// Module Name:   C:/Xilinx/14.7/dld_assigns/float_MAC/tb_karastuba_12bit.v
+// Module Name:   C:/Users/Dongbeom Son/Desktop/repos/dld_assigns/float_MAC/tb_karastuba_12bit.v
 // Project Name:  float_MAC
 // Target Device:  
 // Tool versions:  
@@ -22,21 +22,22 @@
 // 
 ////////////////////////////////////////////////////////////////////////////////
 
-module tb_karastuba_12bit;
+module tb_karastuba_10bit;
 
 	// Inputs
-	reg [11:0] a;
-	reg [11:0] b;
+	reg [9:0] a;
+	reg [9:0] b;
 
 	// Outputs
-	wire [23:0] out;
+	wire [19:0] out;
 
 	// Instantiate the Unit Under Test (UUT)
-	karastuba_12bit uut (
+	karastuba_10bit uut (
 		.a(a), 
 		.b(b), 
 		.out(out)
 	);
+
 	initial begin
 		// Initialize Inputs
 		a = 10'd996;
@@ -51,7 +52,6 @@ module tb_karastuba_12bit;
 	
 	always #50 a=a+4;
 	always #50 b=b+4;
-      
       
 endmodule
 

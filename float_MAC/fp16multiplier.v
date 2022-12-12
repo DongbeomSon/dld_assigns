@@ -171,15 +171,16 @@ endmodule
 
 module biasAdder(
 	A,B,
-	out
+	out, shift
 	);
 	input [4:0] A,B;
+	input shift;
 	output [4:0] out;
 	
 
 	wire [4:0]temp;
 	
-	RCA #(.bw(5)) badder1(A,B,0,temp);
+	RCA #(.bw(5)) badder1(A,B,shift,temp);
 	RCA #(.bw(5)) badder2(temp,5'b10000,1,out);
 	
 endmodule
@@ -321,25 +322,65 @@ module karastuba_10bit(
 
 endmodule
 
-module menMult(
+module karastuba_12bit(
 	a,b,
 	out
 	);
 	
+	input [11:0] a,b;
+	output [23:0] out;
+	
+	wire [5:0] a1, ar;
+	wire [5:0] b1, br;
+	
+	wire [11:0] xy, r, x1,x2;
+	wire [11:0] mid;
+	wire [11:0] mid2, mid3;
+	
+	wire [12:0] tsum;
+	
+	assign a1 = a[11:6];
+	assign ar = a[5:0];
+	
+	assign b1 = b[11:6];
+	assign br = b[5:0];
+	
+	karastuba_6bit km0(a1, b1, xy);
+	karastuba_6bit km1(ar, br, r);
+	karastuba_6bit km2(a1, br, x1);
+	karastuba_6bit km3(ar, b1, x2);
+	
+	RCA #(.bw(12)) rca1(x1, x2, 0, tsum[11:0],tsum[12]);
+	
+	wire [23:0] t1, t2, t3;
+	
+	assign t1 = {0, xy, 12'b0};
+	assign t2 = {0, tsum, 6'b0};
+	assign t3 = r;
+	
+	wire [23:0] psum;
+	
+	RCA #(.bw(24)) add1(t1,t3,0, psum);
+	RCA #(.bw(24)) add2(psum,t2,0, out);
+	
+endmodule
+
+module menMult(
+	a,b,
+	out, cout
+	);
+	
 	input [9:0] a,b;
 	output [9:0] out;
-	
+	output cout;
 	wire [23:0] multi;
 	
-	wire [11:0] a12, b12;
-	
-	assign a12 = {a,2'b0};
-	assign b12 = {b,2'b0};
-	
-	karastuba_12bit menti(a12,b12,multi);
+	karastuba_12bit menti({1'b1,a,1'b0},{1'b1,b,1'b0},multi);
 	
 	//need rounding
-	assign out = multi[23:14];
+	
+	assign cout = multi[23];
+	assign out = cout ? multi[22:13] : multi[21:12];
 	
 	
 //	assign out = 0;
@@ -356,9 +397,11 @@ module fp16multiplier(
 	 
 	 wire [15:0] product;
 	 
+	 wire cout;
+	 
 	 assign product[15] = A[15]^B[15];
-	 biasAdder U0(A[14:10],B[14:10], product[14:10]);
-	 menMult U1(A[9:0], B[9:0], product[9:0]);
+	 biasAdder U0(A[14:10],B[14:10], product[14:10], cout);
+	 menMult U1(A[9:0], B[9:0], product[9:0], cout);
 	 
 	 always@(posedge CLK, negedge RESETn) begin
 		if(!RESETn) begin
