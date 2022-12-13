@@ -13,7 +13,7 @@ set INPUTPORT [remove_from_collection [all_inputs] [get_ports "CLK RESETn"]]
 
 set OUTPUTPORT [all_outputs]
 
-set_load[load_of saed32rvt_ff1p16vn40c/NBUFFX2_RVT/A] $OUTPUTPORT
+set_load [load_of saed32rvt_ff1p16vn40c/NBUFFX2_RVT/A] $OUTPUTPORT
 
 set_driving_cell -library saed32rvt_ff1p16vn40c -lib_cell NBUFFX2_RVT -pin Y -no_design_rule $INPUTPORT
 
