@@ -44,16 +44,6 @@ module CSA #(parameter bw = 4)(A, B, Cin, Co, Sum, Cout);
 			end
 		end
 	endgenerate	
-	
-/* full_adder fa0(.A(A[0]), .B(B[0]), .Cin(Cin[0]), .Sum(S0[0]), .Cout(C0[0]));
-full_adder fa1(.A(A[1]), .B(B[1]), .Cin(Cin[1]), .Sum(S0[1]), .Cout(C0[1]));
-full_adder fa2(.A(A[2]), .B(B[2]), .Cin(Cin[2]), .Sum(S0[2]), .Cout(C0[2]));
-full_adder fa3(.A(A[3]), .B(B[3]), .Cin(Cin[3]), .Sum(S0[3]), .Cout(C0[3]));
-
-full_adder fa4(.A(Co[0]), .B(S0[0]), .Cin(1'b0)  , .Sum(Sum[0]),.Cout(C1[0]));
-full_adder fa5(.A(Co[1]), .B(S0[1]), .Cin(C0[0]), .Sum(S1[0]), .Cout(C1[1]));
-full_adder fa6(.A(Co[2]), .B(S0[2]), .Cin(C0[1]), .Sum(S1[1]), .Cout(C1[2]));
-full_adder fa7(.A(Co[3]), .B(S0[3]), .Cin(C0[2]), .Sum(S1[2]), .Cout(C1[3])); */
 
 	RCA #(.bw(4)) r0(.A(C1[bw-1:0]), .B({C0[bw-1], S1[bw-2:0]}), .Cin(1'b0), .Sum(Sum[bw:1]), .Cout(Cout));
 
