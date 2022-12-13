@@ -18,17 +18,23 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module fpadder(A, B, CLK, RESETn, Sum);
+module fpadder(A, B, CLK, RESETn, sum);
 	input [15:0] A, B;
 	input CLK, RESETn;
-	output [15:0] Sum;
+	output [15:0] sum;
 	reg [4:0] exp, expA, expB, expA_R, expB_R;
 	reg  sA, sB, s, S, temp;
 	reg [10:0] mtsA,  mtsB, mts, mtsA_R, mtsB_R;
 	reg [11:0] R_mts, mts_temp;
 	reg [4:0] Difference;
 	
+	reg [15:0] Sum;
+	
+	assign sum = Sum;
 	always@(posedge CLK, negedge RESETn) begin
+		if(!RESETn) begin
+			Sum <= 0;
+		end else begin
 		//initial value sign, exponential, mantissa
 		sA = A[15];
 		sB = B[15];
@@ -82,6 +88,7 @@ module fpadder(A, B, CLK, RESETn, Sum);
 				exp = exp - 5'd1;
 			end
 		end
+		Sum <= {s, exp, mts[9:0]};
 	end
-	assign Sum = {s, exp, mts[9:0]};
+	end
 endmodule

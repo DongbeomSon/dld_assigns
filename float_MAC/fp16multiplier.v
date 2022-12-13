@@ -378,6 +378,7 @@ module karastuba_12bit(
 	
 	//RCA #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
 	kogge_stone_Nbit_NOCLK #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
+	//CSA #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
 	
 	wire [23:0] t1, t2, t3;
 	

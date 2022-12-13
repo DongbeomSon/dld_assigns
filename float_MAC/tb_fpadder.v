@@ -39,7 +39,7 @@ module tb_fpadder;
 		.B(B), 
 		.CLK(CLK), 
 		.RESETn(RESETn), 
-		.Sum(Sum)
+		.sum(Sum)
 	);
 
 	initial begin
