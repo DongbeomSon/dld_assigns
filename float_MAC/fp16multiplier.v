@@ -19,29 +19,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 
-module full_adder(
-	A,B,cin,
-	sum,cout);
-	
-	input A,B,cin;
-	output sum, cout;
-	
-	assign sum = A ^ B ^ cin;
-	assign cout = (A&B) | (B&cin)|(A&cin);
-	
-endmodule
-
-module half_adder(
-	A,B,sum,cout);
-	
-	input A,B;
-	output sum, cout;
-	
-	assign sum = A^B;
-	assign cout = A&B;
-	
-endmodule
-
 module RCA #(parameter bw = 4)(A, B, Cin, Sum, Cout);
 	//can be subsitude with other adder to recude delay
 	input [bw:1] A;
