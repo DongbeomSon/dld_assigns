@@ -429,9 +429,13 @@ module fp16multiplier(
 	 
 	 wire cout;
 	 
-	 assign product[15] = A[15]^B[15];
+	 wire sign = (A[15]^B[15]);
+	 buf(product[15],sign);
+	 //assign product[15] = A[15]^B[15];
 	 biasAdder U0(A[14:10],B[14:10], product[14:10], cout);
 	 menMult U1(A[9:0], B[9:0], product[9:0], cout);
+	 
+	 //assign out = reg_out;
 	 
 	 always@(posedge CLK, negedge RESETn) begin
 		if(!RESETn) begin

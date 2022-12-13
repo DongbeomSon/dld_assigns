@@ -4,15 +4,15 @@
 // Company: 
 // Engineer:
 //
-// Create Date:   16:55:50 12/13/2022
-// Design Name:   CSA
-// Module Name:   C:/Xilinx/14.7/CSA/tb_CSA.v
-// Project Name:  CSA
+// Create Date:   04:09:46 12/11/2022
+// Design Name:   CSA_4bit
+// Module Name:   C:/Users/Dongbeom Son/Desktop/repos/dld_assigns/float_MAC/tb_csa.v
+// Project Name:  float_MAC
 // Target Device:  
 // Tool versions:  
 // Description: 
 //
-// Verilog Test Fixture created by ISE for module: CSA
+// Verilog Test Fixture created by ISE for module: CSA_4bit
 //
 // Dependencies:
 // 
@@ -22,43 +22,40 @@
 // 
 ////////////////////////////////////////////////////////////////////////////////
 
-module tb_CSA;
+module tb_csa;
 
 	// Inputs
-	reg [4:1] A;
-	reg [4:1] B;
-	reg [4:1] Cin;
-	
+	reg a;
+	reg b;
+	reg c;
+	reg d;
+	reg [1:0] add;
 
 	// Outputs
-	wire [4:0] Sum;
-	wire Cout;
+	wire [2:0] out;
+	wire cout;
 
 	// Instantiate the Unit Under Test (UUT)
-	CSA uut (
-		.A(A), 
-		.B(B), 
-		.Cin(Cin), 
-		
-		.Sum(Sum), 
-		.Cout(Cout)
+	CSA_4bit uut (
+		.a(a), 
+		.b(b), 
+		.c(c), 
+		.d(d), 
+		.add(add), 
+		.out(out), 
+		.cout(cout)
 	);
 
 	initial begin
 		// Initialize Inputs
-		A = 0;
-		B = 0;
-		Cin = 0;
-		
-		
-		A=4'b1010; B=4'b0011; Cin=4'b0000; 
-		#100
-		A=4'b1101; B=4'b0111; Cin=4'b0001;
-		
+		a = 1;
+		b = 1;
+		c = 1;
+		d = 1;
+		add = 11;
 
 		// Wait 100 ns for global reset to finish
 		#100;
-        
 		// Add stimulus here
 
 	end
