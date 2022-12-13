@@ -19,7 +19,28 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 
+module full_adder(
+	A,B,cin,
+	sum,cout);
+	
+	input A,B,cin;
+	output sum, cout;
+	
+	assign sum = A ^ B ^ cin;
+	assign cout = (A&B) | (B&cin)|(A&cin);
+	
+endmodule
 
+module half_adder(
+	A,B,sum,cout);
+	
+	input A,B;
+	output sum, cout;
+	
+	assign sum = A^B;
+	assign cout = A&B;
+	
+endmodule
 
 module RCA #(parameter bw = 4)(A, B, Cin, Sum, Cout);
 	//can be subsitude with other adder to recude delay
@@ -251,8 +272,10 @@ module karastuba_6bit(
 	
 	vedic_4bit u2(tsum[0], tsum[1], mid);
 	
-	RCA #(.bw(8)) sub1(.A(mid), .B(~xy), .Cin(1'b1), .Sum(mid2), .Cout());
-	RCA #(.bw(8)) sub2(.A(mid2), .B(~r), .Cin(1'b1), .Sum(mid3), .Cout());
+	//RCA #(.bw(8)) sub1(.A(mid), .B(~xy), .Cin(1'b1), .Sum(mid2), .Cout());
+	kogge_stone_Nbit_NOCLK #(.bw(8)) sub1(.A(mid), .B(~xy), .Cin(1'b1), .Sum(mid2), .Cout());
+	//RCA #(.bw(8)) sub2(.A(mid2), .B(~r), .Cin(1'b1), .Sum(mid3), .Cout());
+	kogge_stone_Nbit_NOCLK #(.bw(8)) sub2(.A(mid2), .B(~r), .Cin(1'b1), .Sum(mid3), .Cout());
 	
 	wire [11:0] t1, t2, t3;
 	
@@ -262,8 +285,10 @@ module karastuba_6bit(
 	
 	wire [11:0] psum;
 	
-	RCA #(.bw(12)) add1(.A(t1),.B(t2),.Cin(1'b0), .Sum(psum), .Cout());
-	RCA #(.bw(12)) add2(.A(psum), .B(t3), .Cin(1'b0), .Sum(out), .Cout());
+	//RCA #(.bw(12)) add1(.A(t1),.B(t2),.Cin(1'b0), .Sum(psum), .Cout());
+	kogge_stone_Nbit_NOCLK #(.bw(12)) add1(.A(t1),.B(t2),.Cin(1'b0), .Sum(psum), .Cout());
+	//RCA #(.bw(12)) add2(.A(psum), .B(t3), .Cin(1'b0), .Sum(out), .Cout());
+	kogge_stone_Nbit_NOCLK #(.bw(12)) add2(.A(psum), .B(t3), .Cin(1'b0), .Sum(out), .Cout());
 	
 
 endmodule
@@ -351,7 +376,8 @@ module karastuba_12bit(
 	karastuba_6bit km2(a1, br, x1);
 	karastuba_6bit km3(ar, b1, x2);
 	
-	RCA #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
+	//RCA #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
+	kogge_stone_Nbit_NOCLK #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
 	
 	wire [23:0] t1, t2, t3;
 	
@@ -361,8 +387,10 @@ module karastuba_12bit(
 	
 	wire [23:0] psum;
 	
-	RCA #(.bw(24)) add1(.A(t1),.B(t3),.Cin(1'b0), .Sum(psum), .Cout());
-	RCA #(.bw(24)) add2(.A(psum),.B(t2),.Cin(1'b0), .Sum(out), .Cout());
+	//RCA #(.bw(24)) add1(.A(t1),.B(t3),.Cin(1'b0), .Sum(psum), .Cout());
+	kogge_stone_Nbit_NOCLK #(.bw(24)) add1(.A(t1),.B(t3),.Cin(1'b0), .Sum(psum), .Cout());
+	//RCA #(.bw(24)) add2(.A(psum),.B(t2),.Cin(1'b0), .Sum(out), .Cout());
+	kogge_stone_Nbit_NOCLK #(.bw(24)) add2(.A(psum),.B(t2),.Cin(1'b0), .Sum(out), .Cout());
 	
 endmodule
 
