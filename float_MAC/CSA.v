@@ -1,17 +1,51 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date:    16:50:44 12/13/2022 
+// Design Name: 
+// Module Name:    CSA 
+// Project Name: 
+// Target Devices: 
+// Tool versions: 
+// Description: 
+//
+// Dependencies: 
+//
+// Revision: 
+// Revision 0.01 - File Created
+// Additional Comments: 
+//
+//////////////////////////////////////////////////////////////////////////////////
 module CSA #(parameter bw = 4)(A, B, Cin, Co, Sum, Cout);
-input [bw-1:0] A, B, Cin, Co;
-output [bw:0] Sum;
-output Cout;
+	input [bw-1:0] A, B, Cin, Co;
+	output [bw:0] Sum;
+	output Cout;
 
-wire [bw-1:0] S0, S1;
-wire [bw-1:0] C0, C1;
-
-
-	//`genvar i;
+	wire [bw-1:0] S0, S1;
+	wire [bw-1:0] C0, C1;
 	
-	//for(i=0; i < bw; i=i+1) begin:loop1
-
-full_adder fa0(.A(A[0]), .B(B[0]), .Cin(Cin[0]), .Sum(S0[0]), .Cout(C0[0]));
+	genvar i;
+	generate
+		for(i=0; i<bw; i=i+1) begin : loop_1
+			full_adder fa0(.A(A[i]), .B(B[i]), .Cin(Cin[i]), .Sum(S0[i]), .Cout(C0[i]));
+		end
+	endgenerate
+	
+	genvar j;
+	generate
+		for(j=0; j<bw; j=j+1) begin : loop_2
+			if(j == 0) begin
+				full_adder fa1(.A(Co[0]), .B(S0[0]), .Cin(1'b0)  , .Sum(Sum[0]),.Cout(C1[0]));
+			end
+			else begin
+				full_adder fa2(.A(Co[j]), .B(S0[j]), .Cin(C0[j-1])  , .Sum(S1[j-1]),.Cout(C1[j]));
+			end
+		end
+	endgenerate	
+	
+/* full_adder fa0(.A(A[0]), .B(B[0]), .Cin(Cin[0]), .Sum(S0[0]), .Cout(C0[0]));
 full_adder fa1(.A(A[1]), .B(B[1]), .Cin(Cin[1]), .Sum(S0[1]), .Cout(C0[1]));
 full_adder fa2(.A(A[2]), .B(B[2]), .Cin(Cin[2]), .Sum(S0[2]), .Cout(C0[2]));
 full_adder fa3(.A(A[3]), .B(B[3]), .Cin(Cin[3]), .Sum(S0[3]), .Cout(C0[3]));
@@ -19,9 +53,9 @@ full_adder fa3(.A(A[3]), .B(B[3]), .Cin(Cin[3]), .Sum(S0[3]), .Cout(C0[3]));
 full_adder fa4(.A(Co[0]), .B(S0[0]), .Cin(1'b0)  , .Sum(Sum[0]),.Cout(C1[0]));
 full_adder fa5(.A(Co[1]), .B(S0[1]), .Cin(C0[0]), .Sum(S1[0]), .Cout(C1[1]));
 full_adder fa6(.A(Co[2]), .B(S0[2]), .Cin(C0[1]), .Sum(S1[1]), .Cout(C1[2]));
-full_adder fa7(.A(Co[3]), .B(S0[3]), .Cin(C0[2]), .Sum(S1[2]), .Cout(C1[3]));
+full_adder fa7(.A(Co[3]), .B(S0[3]), .Cin(C0[2]), .Sum(S1[2]), .Cout(C1[3])); */
 
-RCA #(.bw(4)) r0(.A(C1[bw-1:0]), .B({C0[bw-1], S1[bw-2:0]}), .Cin(1'b0), .Sum(Sum[bw:1]), .Cout(Cout));
+	RCA #(.bw(4)) r0(.A(C1[bw-1:0]), .B({C0[bw-1], S1[bw-2:0]}), .Cin(1'b0), .Sum(Sum[bw:1]), .Cout(Cout));
 
 endmodule 
 
