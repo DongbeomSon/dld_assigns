@@ -6,6 +6,11 @@ output Cout;
 wire [bw-1:0] S0, S1;
 wire [bw-1:0] C0, C1;
 
+
+	//`genvar i;
+	
+	//for(i=0; i < bw; i=i+1) begin:loop1
+
 full_adder fa0(.A(A[0]), .B(B[0]), .Cin(Cin[0]), .Sum(S0[0]), .Cout(C0[0]));
 full_adder fa1(.A(A[1]), .B(B[1]), .Cin(Cin[1]), .Sum(S0[1]), .Cout(C0[1]));
 full_adder fa2(.A(A[2]), .B(B[2]), .Cin(Cin[2]), .Sum(S0[2]), .Cout(C0[2]));
