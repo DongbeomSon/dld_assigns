@@ -18,34 +18,24 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module CSA #(parameter bw = 4)(A, B, Cin, Co, Sum, Cout);
-	input [bw-1:0] A, B, Cin, Co;
+module CSA #(parameter bw = 4)(A, B, Cin, Sum, Cout);
+	input [bw-1:0] A, B, Cin;
 	output [bw:0] Sum;
 	output Cout;
 
-	wire [bw-1:0] S0, S1;
-	wire [bw-1:0] C0, C1;
+	wire [bw-1:0] S0;
+	wire [bw-1:0] C0;
 	
 	genvar i;
 	generate
 		for(i=0; i<bw; i=i+1) begin : loop_1
 			full_adder fa0(.A(A[i]), .B(B[i]), .Cin(Cin[i]), .Sum(S0[i]), .Cout(C0[i]));
 		end
+		
 	endgenerate
-	
-	genvar j;
-	generate
-		for(j=0; j<bw; j=j+1) begin : loop_2
-			if(j == 0) begin
-				full_adder fa1(.A(Co[0]), .B(S0[0]), .Cin(1'b0)  , .Sum(Sum[0]),.Cout(C1[0]));
-			end
-			else begin
-				full_adder fa2(.A(Co[j]), .B(S0[j]), .Cin(C0[j-1])  , .Sum(S1[j-1]),.Cout(C1[j]));
-			end
-		end
-	endgenerate	
+	assign Sum[0] = S0[0];
 
-	RCA #(.bw(4)) r0(.A(C1[bw-1:0]), .B({C0[bw-1], S1[bw-2:0]}), .Cin(1'b0), .Sum(Sum[bw:1]), .Cout(Cout));
+	RCA #(.bw(4)) r0(.A({C0[bw-1:1], 1'b0}), .B({1'b0,S0[bw-1:1]}), .Cin(C0[0]), .Sum(Sum[bw:1]), .Cout(Cout));
 
 endmodule 
 
