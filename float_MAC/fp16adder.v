@@ -24,10 +24,12 @@ module fpadder(A, B, CLK, RESETn, sum);
 	output [15:0] sum;
 	reg [4:0] exp, expA, expB, expA_R, expB_R;
 	reg  sA, sB, s, S, temp;
-	reg [10:0] mtsA,  mtsB, mts, mtsA_R, mtsB_R;
-	reg [11:0] R_mts, mts_temp;
+	reg [10:0] mtsA,  mtsB, mtsA_R, mtsB_R;
+	reg [11:0] R_mts, mts_temp, mts;
+	reg [11:0] mts_rnd;
 	reg [4:0] Difference;
-	
+	reg g, r;
+	reg rndup;
 	reg [15:0] Sum;
 	
 	assign sum = Sum;
@@ -80,15 +82,19 @@ module fpadder(A, B, CLK, RESETn, sum);
 		temp = sA ^ sB;
 		s = S ? (sA ^ (R_mts[11] & temp)) : (sB ^ (R_mts[11] & temp));
 		mts_temp = (R_mts[11] & temp) ? (~R_mts + 12'd1) : R_mts;
-		mts = mts_temp[11:1];
+		mts = mts_temp[11:0];
 		exp = expA_R;
 		repeat(11) begin
-			if (mts[10] == 1'b0) begin
+			if (mts[11] == 1'b0) begin
 				mts = mts << 1'b1;
 				exp = exp - 5'd1;
 			end
 		end
-		Sum <= {s, exp, mts[9:0]};
+		g = mts[1];
+		r = mts[0];
+		rndup = g & r;
+		mts_rnd = mts + rndup;
+		Sum <= {s, exp, mts_rnd[10:1]};
 	end
 	end
 endmodule
