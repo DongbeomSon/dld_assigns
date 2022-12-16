@@ -249,10 +249,10 @@ module karastuba_6bit(
 	
 	vedic_4bit u2(tsum[0], tsum[1], mid);
 	
-	//RCA #(.bw(8)) sub1(.A(mid), .B(~xy), .Cin(1'b1), .Sum(mid2), .Cout());
-	kogge_stone_Nbit_NOCLK #(.bw(8)) sub1(.A(mid), .B(~xy), .Cin(1'b1), .Sum(mid2), .Cout());
-	//RCA #(.bw(8)) sub2(.A(mid2), .B(~r), .Cin(1'b1), .Sum(mid3), .Cout());
-	kogge_stone_Nbit_NOCLK #(.bw(8)) sub2(.A(mid2), .B(~r), .Cin(1'b1), .Sum(mid3), .Cout());
+	RCA #(.bw(8)) sub1(.A(mid), .B(~xy), .Cin(1'b1), .Sum(mid2), .Cout());
+	//kogge_stone_Nbit_NOCLK #(.bw(8)) sub1(.A(mid), .B(~xy), .Cin(1'b1), .Sum(mid2), .Cout());
+	RCA #(.bw(8)) sub2(.A(mid2), .B(~r), .Cin(1'b1), .Sum(mid3), .Cout());
+	//kogge_stone_Nbit_NOCLK #(.bw(8)) sub2(.A(mid2), .B(~r), .Cin(1'b1), .Sum(mid3), .Cout());
 	
 	wire [11:0] t1, t2, t3;
 	
@@ -262,10 +262,10 @@ module karastuba_6bit(
 	
 	wire [11:0] psum;
 	
-	//RCA #(.bw(12)) add1(.A(t1),.B(t2),.Cin(1'b0), .Sum(psum), .Cout());
-	kogge_stone_Nbit_NOCLK #(.bw(12)) add1(.A(t1),.B(t2),.Cin(1'b0), .Sum(psum), .Cout());
-	//RCA #(.bw(12)) add2(.A(psum), .B(t3), .Cin(1'b0), .Sum(out), .Cout());
-	kogge_stone_Nbit_NOCLK #(.bw(12)) add2(.A(psum), .B(t3), .Cin(1'b0), .Sum(out), .Cout());
+	RCA #(.bw(12)) add1(.A(t1),.B(t2),.Cin(1'b0), .Sum(psum), .Cout());
+	//kogge_stone_Nbit_NOCLK #(.bw(12)) add1(.A(t1),.B(t2),.Cin(1'b0), .Sum(psum), .Cout());
+	RCA #(.bw(12)) add2(.A(psum), .B(t3), .Cin(1'b0), .Sum(out), .Cout());
+	//kogge_stone_Nbit_NOCLK #(.bw(12)) add2(.A(psum), .B(t3), .Cin(1'b0), .Sum(out), .Cout());
 	
 
 endmodule
@@ -353,8 +353,8 @@ module karastuba_12bit(
 	karastuba_6bit km2(a1, br, x1);
 	karastuba_6bit km3(ar, b1, x2);
 	
-	//RCA #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
-	kogge_stone_Nbit_NOCLK #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
+	RCA #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
+	//kogge_stone_Nbit_NOCLK #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
 	//CSA #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
 	
 	wire [23:0] t1, t2, t3;
@@ -365,10 +365,10 @@ module karastuba_12bit(
 	
 	wire [23:0] psum;
 	
-	//RCA #(.bw(24)) add1(.A(t1),.B(t3),.Cin(1'b0), .Sum(psum), .Cout());
-	kogge_stone_Nbit_NOCLK #(.bw(24)) add1(.A(t1),.B(t3),.Cin(1'b0), .Sum(psum), .Cout());
-	//RCA #(.bw(24)) add2(.A(psum),.B(t2),.Cin(1'b0), .Sum(out), .Cout());
-	kogge_stone_Nbit_NOCLK #(.bw(24)) add2(.A(psum),.B(t2),.Cin(1'b0), .Sum(out), .Cout());
+	RCA #(.bw(24)) add1(.A(t1),.B(t3),.Cin(1'b0), .Sum(psum), .Cout());
+	//kogge_stone_Nbit_NOCLK #(.bw(24)) add1(.A(t1),.B(t3),.Cin(1'b0), .Sum(psum), .Cout());
+	RCA #(.bw(24)) add2(.A(psum),.B(t2),.Cin(1'b0), .Sum(out), .Cout());
+	//kogge_stone_Nbit_NOCLK #(.bw(24)) add2(.A(psum),.B(t2),.Cin(1'b0), .Sum(out), .Cout());
 	
 endmodule
 
@@ -394,49 +394,6 @@ module menMult(
 	
 endmodule
 
-module encoder(
-	A,B, product,
-	out
-);
-
-	input [14:0] A, B;
-	input [14:0] product;
-	
-	output [14:0] out;
-	
-	wire [4:0] bA = A[14:10];
-	wire [4:0] bB = B[14:10];
-	
-	wire [9:0] sA = A[9:0];
-	wire [9:0] sB = B[9:0];
-	
-	wire nzsA, nzsB;
-	
-	assign nzsA = (A[0] | A[1] | A[2] | A[3] | A[4] | A[5] | A[6] | A[7] | A[8] | A[9]);
-	assign nzsB = (B[0] | B[1] | B[2] | B[3] | B[4] | B[5] | B[6] | B[7] | B[8] | B[9]);
-	
-	wire zA = ~(bA[0] | bA[1] | bA[2] | bA[3] | bA[4]);
-	wire zB = ~(bB[0] | bB[1] | bB[2] | bB[3] | bB[4]);
-	
-	wire iA = bA[0] & bA[1] & bA[2] & bA[3] & bA[4];
-	wire iB = bB[0] & bB[1] & bB[2] & bB[3] & bB[4];
-	
-	wire z = zA | zB;
-	wire i = iA | iB;
-	
-	wire nanA = iA & nzsA;
-	wire nanB = iB & nzsB;
-	
-	wire nan = nanA | nanB;
-	
-	wire [14:0] nanOut = {5'b11111,10'b1};
-
-	
-	assign out = nan ? nanOut : (z ? (i ? nanOut : 15'b0) : i ? 15'h7c00 : product);
-	
-	
-endmodule
-
 module fp16multiplier(
 		A,B,	CLK,	RESETn,
 		out
@@ -445,7 +402,6 @@ module fp16multiplier(
 	 input CLK, RESETn;
 	 output reg [15:0] out;
 	 
-	 wire [14:0] bmp;
 	 wire [15:0] product;
 	 
 	 wire cout;
@@ -453,9 +409,8 @@ module fp16multiplier(
 	 wire sign = (A[15]^B[15]);
 	 buf(product[15],sign);
 	 //assign product[15] = A[15]^B[15];
-	 biasAdder U0(A[14:10],B[14:10], bmp[14:10], cout);
-	 menMult U1(A[9:0], B[9:0], bmp[9:0], cout);
-	 encoder U2(A[14:0], B[14:0], bmp, product[14:0]);
+	 biasAdder U0(A[14:10],B[14:10], product[14:10], cout);
+	 menMult U1(A[9:0], B[9:0], product[9:0], cout);
 	 
 	 //assign out = reg_out;
 	 

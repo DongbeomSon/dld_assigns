@@ -44,6 +44,74 @@ module tb_fp16multiplier;
 
 	initial begin
 		// Initialize Inputs
+		
+		//A=0
+		A = 16'd0;
+		
+		//0 -> 0
+		B = 16'd0;
+		#200
+		//nz -> 0
+		B = 16'h528f;
+		#200
+		//inf -> nan
+		B = 16'h7c00;
+		#200
+		//nan -> nan
+		B = 16'h7c01;
+		#200
+		
+		//inf
+		A = 16'h7c00;
+		
+		//0 -> nan
+		B = 16'd0;
+		#200
+		//nz -> inf
+		B = 16'h528f;
+		#200
+		//inf -> inf
+		B = 16'h7c00;
+		#200
+		//nan -> nan
+		B = 16'h7c01;
+		#200
+		
+		//nz
+		A = 16'h528f;
+		
+		//0 -> 0
+		B = 16'd0;
+		#200
+		//nz -> nz
+		B = 16'h528f;
+		#200
+		//inf -> inf
+		B = 16'h7c00;
+		#200
+		//nan -> nan
+		B = 16'h7c01;
+		#200
+		
+		
+		//nan
+		A = 16'h7c01;
+		
+		//0 -> nan
+		B = 16'd0;
+		#200
+		//nz -> nan
+		B = 16'h528f;
+		#200
+		//inf -> nan
+		B = 16'h7c00;
+		#200
+		//nan -> nan
+		B = 16'h7c01;
+		#200
+		
+		
+		/*
 	A = 16'h0xd5c7;
 	B = 16'h0x528f;
 	#200
@@ -74,7 +142,7 @@ module tb_fp16multiplier;
 	A = 16'h0x54d4;
 	B = 16'h0x5850;
 	#200
-
+*/
 
 		
 		// Wait 100 ns for global reset to finish
