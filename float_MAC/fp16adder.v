@@ -58,7 +58,7 @@ module fpadder(A, B, CLK, RESETn, sum);
 			expA_R = expA + 5'd1;
 			expB_R = expA + 5'd1;
 			mtsA_R = mtsA;
-			mtsB_R = mtsB >> Difference;
+			mtsB_R = mtsB >> Difference; //ÇìÇì
 			S = 1'b1;
 		end
 		else begin
