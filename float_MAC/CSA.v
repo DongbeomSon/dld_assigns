@@ -29,7 +29,7 @@ module CSA #(parameter bw = 4)(A, B, Cin, Sum, Cout);
 	genvar i;
 	generate
 		for(i=0; i<bw; i=i+1) begin : loop_1
-			full_adder fa0(.A(A[i]), .B(B[i]), .Cin(Cin[i]), .Sum(S0[i]), .Cout(C0[i]));
+			full_adder fa0(.A(A[i]), .B(B[i]), .cin(Cin[i]), .sum(S0[i]), .cout(C0[i]));
 		end
 		
 	endgenerate
