@@ -27,6 +27,8 @@ report_resources > reports/synth_resources.rpt
 report_timing -max_paths 10 > reports/synth_timing.rpt
 report_power -analysis_effort medium > reports/synth_power.rpt
 
-write_sdc results/fp16mac.sdc -version 2.1
-write -f ddc -hierarchy -output results/fp16mac.ddc
-write -hierarchy -format verilog -output results/fp16mac_HDL.v
+
+write_sdc results/fp16MAC.sdc -version 2.1
+write -f ddc -hierarchy -output results/fp16MAC.ddc
+write -hierarchy -format verilog -output results/fp16MAC_HDL.v
+
