@@ -82,14 +82,14 @@ module G_Cell(G0, G1, P1, GG);
 endmodule
 
 module full_adder(
-	A,B,Cin,
-	Sum,Cout);
+	A,B,cin,
+	sum,cout);
 	
-	input A,B,Cin;
-	output Sum, Cout;
+	input A,B,cin;
+	output sum, cout;
 	
-	assign Sum = A ^ B ^ Cin;
-	assign Cout = (A&B) | (B&Cin)|(A&Cin);
+	assign sum = A ^ B ^ cin;
+	assign cout = (A&B) | (B&cin)|(A&cin);
 	
 endmodule
 
