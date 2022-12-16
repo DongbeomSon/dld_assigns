@@ -386,8 +386,21 @@ module menMult(
 	
 	//need rounding
 	
-	assign cout = multi[23];
-	assign out = cout ? multi[22:13] : multi[21:12];
+	wire cout = multi[23];
+	
+	wire [11:0] rnd = multi[23:12];
+	wire r = cout ? multi[12] : multi[11];
+	wire sticky = multi[10] | multi[9] | multi[8] | multi[7] | multi[6] | multi[5] | multi[4] | multi[3] | multi[2] | multi[1] | multi[0];
+	wire s = cout ? sticky | multi[11] : sticky;
+	wire g = cout ? multi[13] : multi[12];
+	
+	wire rndup = r ? (s ? 1'b1 : r & g) : 1'b0;
+	
+	wire [11:0] rnd_p;
+	RCA #(.bw(12)) rnd_add(.A(rnd), .B(12'b0), .Cin(rndup), .Sum(rnd_p), .Cout());
+
+	assign cout = rnd_p[11];
+	assign out = cout ? rnd_p[10:1] : rnd_p[9:0];
 	
 	
 //	assign out = 0;
@@ -433,7 +446,6 @@ module encoder(
 
 	
 	assign out = nan ? nanOut : (z ? (i ? nanOut : 15'b0) : i ? 15'h7c00 : product);
-	
 	
 endmodule
 

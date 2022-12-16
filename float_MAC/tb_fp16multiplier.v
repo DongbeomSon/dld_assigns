@@ -44,7 +44,7 @@ module tb_fp16multiplier;
 
 	initial begin
 		// Initialize Inputs
-		
+		/*
 		//A=0
 		A = 16'd0;
 		
@@ -110,8 +110,8 @@ module tb_fp16multiplier;
 		B = 16'h7c01;
 		#200
 		
+		*/
 		
-		/*
 	A = 16'h0xd5c7;
 	B = 16'h0x528f;
 	#200
@@ -142,7 +142,7 @@ module tb_fp16multiplier;
 	A = 16'h0x54d4;
 	B = 16'h0x5850;
 	#200
-*/
+
 
 		
 		// Wait 100 ns for global reset to finish
