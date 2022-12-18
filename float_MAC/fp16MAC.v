@@ -36,12 +36,14 @@ module fp16MAC(
 	 fp16multiplier m1(a,b,CLK,RESETn, result_m);
 	 fpadder a1(pAcc,result_m, CLK, RESETn, result_a);
 	 
+	 
 	 always@(posedge CLK, negedge RESETn) begin
 		if(!RESETn) begin
 			acc <= 0;
 		end else begin
 			acc <= result_a;
 	end
+	
 	end
 
 endmodule

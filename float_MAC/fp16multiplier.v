@@ -432,10 +432,13 @@ module encoder(
 	wire zA = ~(bA[0] | bA[1] | bA[2] | bA[3] | bA[4]);
 	wire zB = ~(bB[0] | bB[1] | bB[2] | bB[3] | bB[4]);
 	
+	wire zzA = zA & ~(nzsA);
+	wire zzB = zB & ~(nzsB);
+	
 	wire iA = bA[0] & bA[1] & bA[2] & bA[3] & bA[4];
 	wire iB = bB[0] & bB[1] & bB[2] & bB[3] & bB[4];
 	
-	wire z = zA | zB;
+	wire z = zzA | zzB;
 	wire i = iA | iB;
 	
 	wire nanA = iA & nzsA;

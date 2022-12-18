@@ -18,6 +18,56 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
+
+module encoder_add(
+	A,B, product,
+	out
+);
+
+	input [15:0] A, B;
+	input [15:0] product;
+	
+	output [15:0] out;
+	
+	wire [4:0] bA = A[14:10];
+	wire [4:0] bB = B[14:10];
+	
+	wire [9:0] sA = A[9:0];
+	wire [9:0] sB = B[9:0];
+	
+	wire nzsA, nzsB;
+	
+	assign nzsA = (A[0] | A[1] | A[2] | A[3] | A[4] | A[5] | A[6] | A[7] | A[8] | A[9]);
+	assign nzsB = (B[0] | B[1] | B[2] | B[3] | B[4] | B[5] | B[6] | B[7] | B[8] | B[9]);
+	
+	wire zA = ~(bA[0] | bA[1] | bA[2] | bA[3] | bA[4]);
+	wire zB = ~(bB[0] | bB[1] | bB[2] | bB[3] | bB[4]);
+	
+	wire zzA = zA & ~(nzsA);
+	wire zzB = zB & ~(nzsB);
+	
+	wire iA = bA[0] & bA[1] & bA[2] & bA[3] & bA[4];
+	wire iB = bB[0] & bB[1] & bB[2] & bB[3] & bB[4];
+	
+	wire z = zzA | zzB;
+	wire i = iA | iB;
+	
+	wire nanA = iA & nzsA;
+	wire nanB = iB & nzsB;
+	
+	wire nan = nanA | nanB;
+	
+	wire [15:0] nanOut = {6'b011111,10'b1};
+	wire [14:0] inf = 15'h7c00;
+	
+	wire sign = A[15]^B[15];
+
+	
+	assign out = nan ? nanOut : (zA ? B : (zB ? A : (iA ? (sign ? nanOut : {A[15],inf}) : (iB ? (sign ? nanOut : {A[15],inf}) : product))));
+	
+endmodule
+
+
 module fpadder(A, B, CLK, RESETn, sum);
 	input [15:0] A, B;
 	input CLK, RESETn;
@@ -32,7 +82,10 @@ module fpadder(A, B, CLK, RESETn, sum);
 	reg rndup;
 	reg [15:0] Sum;
 	
-	assign sum = Sum;
+	wire e;
+	
+	encoder_add en(A,B,Sum,sum);
+	//assign sum = 
 	always@(posedge CLK, negedge RESETn) begin
 		if(!RESETn) begin
 			Sum <= 0;
