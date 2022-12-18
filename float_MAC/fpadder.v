@@ -76,7 +76,7 @@ module mantissa(sA, sB, mtsA_R, mtsB_R, R_mts);
    input wire [10:0] mtsA_R, mtsB_R;
    output wire [11:0] R_mts;
          
-   assign R_mts = (sA ^ sB) ? mtsA_R - mtsB_R : mtsA_R + mtsB_R;
+   assign R_mts = sA ^ sB ? mtsA_R - mtsB_R : mtsA_R + mtsB_R;
 endmodule
       
 module normalization(sA, sB, s, S, expA_R, exp, R_mts, mts);
@@ -85,31 +85,27 @@ module normalization(sA, sB, s, S, expA_R, exp, R_mts, mts);
    input wire [11:0] R_mts;
    input wire[4:0] expA_R;
    output s;
-   output wire [4:0] exp;
-   output wire [10:0] mts;
+   output [4:0] exp;
+   output [10:0] mts;
+
    wire temp;
 	wire [4:0] exp_temp;
 	wire [10:0] mts_temp;
    wire [11:0] mts_temp1;
-      
-   assign temp = sA ^ sB;
+
+	
+	
+	assign temp = sA ^ sB;
    assign s = S ? (sA ^ (R_mts[11] & temp)) : (sB ^ (R_mts[11] & temp));
    assign mts_temp1 = (R_mts[11] & temp) ? (~R_mts + 12'd1) : R_mts;
    assign mts_temp = mts_temp1[11:1];
    assign exp_temp = expA_R;
 	
-	
-	genvar i;
-	generate 
-		for(i=0; i<11; i=i+1) begin : loop_1
-			assign mts = (mts_temp[10] == 1'b0) ? mts_temp << 1'b1 : mts_temp;
-			assign exp = (mts_temp[10] == 1'b0) ? exp_temp - 5'd1 : exp_temp;
-		end
-	endgenerate
-	
+	assign mts = (mts_temp[10] == 0) ? (mts_temp[9] == 0) ? (mts_temp[8] == 0) ? (mts_temp[7]==0) ? mts_temp[6]==0 ? mts_temp[5]==0 ? mts_temp[4]==0 ? mts_temp[3]==0 ? mts_temp[2]==0 ? mts_temp[1]==0 ? mts_temp[0] ==0 ?
+					  mts_temp << 11: mts_temp << 10: mts_temp << 9 : mts_temp << 8 : mts_temp << 7 : mts_temp << 6 : mts_temp << 5 : mts_temp << 4 : mts_temp << 3: mts_temp << 2 : mts_temp << 1 : mts_temp;
+	assign exp = (mts_temp[10] == 0) ? (mts_temp[9] == 0) ? (mts_temp[8] == 0) ? (mts_temp[7]==0) ? mts_temp[6]==0 ? mts_temp[5]==0 ? mts_temp[4]==0 ? mts_temp[3]==0 ? mts_temp[2]==0 ? mts_temp[1]==0 ? mts_temp[0] ==0 ?
+					  exp_temp - 5'd11: exp_temp - 5'd10: exp_temp - 5'd9 : exp_temp - 5'd8 : exp_temp - 5'd7 : exp_temp - 5'd6 : exp_temp - 5'd5 : exp_temp - 5'd4 : exp_temp - 5'd3: exp_temp - 5'd2 : exp_temp - 5'd1 : exp_temp;
 
-				
-		
-		
-      
+  
 endmodule
+
