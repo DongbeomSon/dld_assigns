@@ -31,7 +31,7 @@ module fp16MAC(
 	 wire [15:0] result_a;
 	 wire [15:0] pAcc;
 	 
-	 assign pAcc = acc;
+	 assign pAcc = result_a;
 	 
 	 fp16multiplier m1(a,b,CLK,RESETn, result_m);
 	 fpadder a1(pAcc,result_m, CLK, RESETn, result_a);

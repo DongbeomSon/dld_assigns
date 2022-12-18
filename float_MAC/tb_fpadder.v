@@ -45,36 +45,37 @@ module tb_fpadder;
    initial begin
       // Initialize Inputs
 	#40
-	A = 16'h0x3db1;
-	B = 16'h0x2520;
-	#20
-	A = 16'h0x3f64;
-	B = 16'h0xb158;
-	#20
-	A = 16'h0xba1c;
-	B = 16'h0xbaa5;
-	#20
-	A = 16'h0x3df0;
-	B = 16'h0x8d86;
-	#20
-	A = 16'h0xb87a;
-	B = 16'h0x3934;
-	#20
-	A = 16'h0xb7e2;
-	B = 16'h0x3f5e;
-	#20
-	A = 16'h0x263b;
-	B = 16'h0xb479;
-	#20
-	A = 16'h0xb27a;
-	B = 16'h0x3554;
-	#20
-	A = 16'h0xae24;
-	B = 16'h0x3f4b;
-	#20
-	A = 16'h0x3617;
-	B = 16'h0xbb1d;
-	#20
+	A = 16'h0xd5c7;
+	B = 16'h0x528f;
+	#200
+	A = 16'h0x4e6e;
+	B = 16'h0x5502;
+	#200
+	A = 16'h0x4fc1;
+	B = 16'h0xd4e1;
+	#200
+	A = 16'h0x54c7;
+	B = 16'h0xc366;
+	#200
+	A = 16'h0x5803;
+	B = 16'h0x59de;
+	#200
+	A = 16'h0xd17a;
+	B = 16'h0x591a;
+	#200
+	A = 16'h0xc13c;
+	B = 16'h0x5944;
+	#200
+	A = 16'h0x488b;
+	B = 16'h0xd006;
+	#200
+	A = 16'h0xd630;
+	B = 16'h0x528f;
+	#200
+	A = 16'h0x54d4;
+	B = 16'h0x5850;
+	#200
+
 
 
       // Wait 100 ns for global reset to finish
