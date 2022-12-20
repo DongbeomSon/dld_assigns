@@ -68,7 +68,7 @@ module encoder_add(
 endmodule
 
 
-module fpadder(A, B, CLK, RESETn, sum);
+module fp16adder(A, B, CLK, RESETn, sum);
 	input [15:0] A, B;
 	input CLK, RESETn;
 	output reg [15:0] sum;
@@ -86,6 +86,7 @@ module fpadder(A, B, CLK, RESETn, sum);
 	*/
 	
 	wire [15:0] en_sum;
+	wire [15:0] Sum;
 	encoder_add en(A,B,Sum,en_sum);
 	
 	wire [4:0] exp, expA, expB, expA_R, expB_R;
@@ -96,7 +97,7 @@ module fpadder(A, B, CLK, RESETn, sum);
 	wire [4:0] Difference;
 	wire g, r;
 	wire rndup;
-	wire [15:0] Sum;
+	
 	
 		//initial value sign, exponential, mantissa
 		assign sA = A[15];

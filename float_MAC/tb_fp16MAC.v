@@ -44,36 +44,41 @@ module tb_fp16MAC;
 
 	initial begin
 		// Initialize Inputs
+/*
+	a = 16'h0xcaca;
+	b = 16'h0xd035;
+	#200
+*/
 	#53
-	a = 16'h0x3db1;
-	b = 16'h0x2520;
+	a = 16'h0xb9d4;
+	b = 16'h0xbda0;
 	#20
-	a = 16'h0x3f64;
-	b = 16'h0xb158;
+	a = 16'h0x366d;
+	b = 16'h0x2961;
 	#20
-	a = 16'h0xba1c;
-	b = 16'h0xbaa5;
+	a = 16'h0x3974;
+	b = 16'h0xbf20;
 	#20
-	a = 16'h0x3df0;
-	b = 16'h0x8d86;
+	a = 16'h0x3668;
+	b = 16'h0xb727;
 	#20
-	a = 16'h0xb87a;
-	b = 16'h0x3934;
+	a = 16'h0x3c22;
+	b = 16'h0xb962;
 	#20
-	a = 16'h0xb7e2;
-	b = 16'h0x3f5e;
+	a = 16'h0x3f21;
+	b = 16'h0xbd6f;
 	#20
-	a = 16'h0x263b;
-	b = 16'h0xb479;
+	a = 16'h0x3bd9;
+	b = 16'h0xbdfe;
 	#20
-	a = 16'h0xb27a;
-	b = 16'h0x3554;
+	a = 16'h0x3a10;
+	b = 16'h0x2d07;
 	#20
-	a = 16'h0xae24;
-	b = 16'h0x3f4b;
+	a = 16'h0x3219;
+	b = 16'h0xbc20;
 	#20
-	a = 16'h0x3617;
-	b = 16'h0xbb1d;
+	a = 16'h0x3d7e;
+	b = 16'h0xae7a;
 	#20
 
 	

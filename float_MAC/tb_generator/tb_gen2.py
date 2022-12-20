@@ -16,7 +16,7 @@ for idx in range(genNum):
     t = bin(np.float16(a).view('H'))[2:].zfill(16)
     f.write("\ta = 16'h" + hex(int(t, 2)) + ";\n")
 
-    x_f32 = random.uniform(-1, 2)
+    x_f32 = random.uniform(-2, 2)
     b = np.float16(x_f32)
     t = bin(np.float16(b).view('H'))[2:].zfill(16)
     f.write("\tb = 16'h" + hex(int(t, 2)) + ";\n")

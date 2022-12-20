@@ -2,10 +2,10 @@ define_design_lib WORK -path “work”
 
 source rm_setup/lib_setup.tcl
 
-analyze -library WORK -format verilog ../RTL/fp16multiplier.v \
-analyze -library WORK -format verilog ../RTL/fp16adder.v \
-analyze -library WORK -format verilog ../RTL/fp16MAC.v \
-analyze -library WORK -format verilog ../RTL/kogge_stone_Nbit.v \
+analyze -library WORK -format verilog ../RTL/fp16multiplier.v
+analyze -library WORK -format verilog ../RTL/fp16adder.v
+analyze -library WORK -format verilog ../RTL/fp16MAC.v
+analyze -library WORK -format verilog ../RTL/kogge_stone_Nbit.v
 analyze -library WORK -format verilog ../RTL/1bit_adder.v
 
 elaborate -architecture verilog -library WORK fp16MAC
@@ -34,6 +34,6 @@ set_max_area 0
 
 compile -area_effort medium -map_effort high > reports/compile_wkogg.rpt
 
-report_timing > reports/kog/k_t.rpt
-report_area > reports/kog/k_a.rpt
-report_area > reports/kog/k_p.rpt
+report_timing > t5.rpt
+report_area > a5.rpt
+report_power > p5.rpt
