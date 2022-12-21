@@ -77,7 +77,8 @@ module Adder3(
 	wire [2:0] pSum [1:0];
 	wire [2:0] out;
 	wire carry;
-
+	
+	/*
 	//stage1
 	full_adder u0(a,b,c,pSum[0][0],pSum[0][1]);
 	
@@ -88,9 +89,26 @@ module Adder3(
 	//RCA
 	full_adder u3(.A(pSum[1][1]), .B(pSum[1][0]), .cin(1'b0),.sum(out[1]), .cout(carry));
 	full_adder u4(.A(carry),.B(pSum[1][2]),.cin(1'b0),.sum(out[2]),.cout());
+	*/
 	
-	assign lsb = out[0];
-	assign msb = out[2:1];
+	wire [1:0] st0;
+	wire [3:0] st1;
+	wire [1:0] st2;
+	
+	wire [2:0] sum;
+	
+	half_adder u0(c,d,st0[0],st1[0]);
+	full_adder u1(a,b,add[0],st0[1],st1[1]);
+	
+	half_adder u2(st0[0], st0[1], sum[0],st1[2]);
+	half_adder u3(st1[0],add[1],st1[3],st2[0]);
+	
+	full_adder u4(st1[3],st1[2],st1[1],sum[1],st2[1]);
+	//half_adder u5(st2[0],st2[1],sum[2],sum[3]);
+	or(sum[2],st2[0],st2[1]);
+	
+	assign lsb = sum[0];
+	assign msb = sum[2:1];
 	
 endmodule
 
@@ -105,13 +123,20 @@ module Adder2(
 	output [1:0] msb;
 	
 	wire [2:0] sum;
-	wire [2:0] temp;
+	wire [1:0] temp;
 	
-	wire [1:0] carry;
+	wire [3:0] carry;
 	
+	/*
 	full_adder u0(a,b,c,temp[0],carry[0]);
 	full_adder u1(add,temp[0],1'b0,sum[0],carry[1]);
 	full_adder u2(carry[0],carry[1],1'b0,sum[1],sum[2]);
+	*/
+	
+	half_adder u0(a,b,temp[0],carry[0]);
+	half_adder u1(c, add, temp[1], carry[1]);
+	half_adder u2(temp[0], temp[1], sum[0], carry[2]);
+	full_adder u3(carry[0], carry[1], carry[2], sum[1], sum[2]);
 	
 	assign lsb = sum[0];
 	assign msb[1:0] = sum[2:1];
@@ -134,9 +159,22 @@ module Adder4(
 	
 	wire [1:0] carry;
 	
+	/*
 	full_adder u0(a,b,c,temp[0],temp[1]);
 	full_adder u1(temp[0],add[0],1'b0,sum[0],carry[0]);
 	full_adder u2(temp[1],add[1],carry[0],sum[1],sum[2]);
+	*/
+	
+	wire [1:0] st0;
+	wire [3:0] st1;
+	wire [1:0] st2;
+	
+	half_adder u0(a,b,st0[0],st1[0]);
+	half_adder u1(c,add[0],st0[1],st1[1]);
+	half_adder u2(st0[0],st0[1],sum[0],st1[2]);
+	full_adder u3(st1[0],st1[1],add[1],st1[3],st2[0]);
+	half_adder u4(st1[2],st1[3],sum[1],st2[1]);
+	or(sum[2],st2[0],st2[1]);
 	
 	assign lsb = sum[0];
 	assign msb = sum[2:1];
@@ -155,12 +193,15 @@ module Adder5(
 	output [1:0] msb;
 	
 	wire [2:0] sum;
-	wire [2:0] temp;
 	
-	wire [1:0] carry;
+	wire carry;
+	wire temp;
 	
-	full_adder u0(a,b,add[0],sum[0],carry[0]);
-	full_adder u1(add[1],carry[0],1'b0,sum[1],sum[2]);
+	half_adder u0(a,b,temp,carry);
+	
+	xor(sum[0], add[0], temp);
+	
+	full_adder u1(temp&add[0],add[1],carry,sum[1],sum[2]);
 	
 	assign lsb = sum[0];
 	assign msb[1:0] = sum[2:1];
@@ -196,7 +237,7 @@ module vedic_4bit(
 	
 	assign pSum[0] = a[0]&b[0];
 	
-	full_adder adder1(a[0]&b[1],a[1]&b[0],1'b0,pSum[1],add[1][0]);
+	half_adder adder1(a[0]&b[1],a[1]&b[0],pSum[1],add[1][0]);
 	
 	Adder2 adder2(a[0]&b[2], a[1]&b[1], a[2]&b[0], add[1][0], pSum[2], add[2]);
 	
@@ -208,7 +249,7 @@ module vedic_4bit(
 	
 	assign pSum[6] = add[5][0] ^ a[3]&b[3];
 	
-	assign pSum[7] = add[5][1] + add[5][0]&a[3]&b[3];
+	assign pSum[7] = add[5][1] | (add[5][0]&a[3]&b[3]);
 
 	assign out = pSum;
 	
@@ -249,23 +290,41 @@ module karastuba_6bit(
 	
 	vedic_4bit u2(tsum[0], tsum[1], mid);
 	
+	wire [7:0] temp;
+	RCA #(.bw(8)) add_mid(.A(xy), .B(r), .Cin(1'b0), .Sum(temp), .Cout());
+	RCA #(.bw(8)) sub_mid(.A(~temp), .B(mid), .Cin(1'b1), .Sum(mid3), .Cout());
+	
+	/*
+	
 	RCA #(.bw(8)) sub1(.A(mid), .B(~xy), .Cin(1'b1), .Sum(mid2), .Cout());
 	//kogge_stone_Nbit_NOCLK #(.bw(8)) sub1(.A(mid), .B(~xy), .Cin(1'b1), .Sum(mid2), .Cout());
 	RCA #(.bw(8)) sub2(.A(mid2), .B(~r), .Cin(1'b1), .Sum(mid3), .Cout());
 	//kogge_stone_Nbit_NOCLK #(.bw(8)) sub2(.A(mid2), .B(~r), .Cin(1'b1), .Sum(mid3), .Cout());
+	*/
 	
 	wire [11:0] t1, t2, t3;
-	
+/*	
 	assign t1 = {xy, 6'b0};
 	assign t2 = {3'b0, mid3, 3'b0};
 	assign t3 = r;
+*/	
+	wire [11:3] psum;
 	
-	wire [11:0] psum;
+	assign t1 = {xy, r};
+	//assign t2 = {6'b0, tsum, 6'b0};
+	wire [11:3] tx = {xy[5:0],r[5:3]};
+	wire [11:3] ty = {3'b0, mid3};
 	
+	RCA #(.bw(9)) add1(.A(tx), .B(ty), .Cin(1'b0), .Sum(psum), .Cout());
+	assign out = {psum,r[2:0]};
+	
+	
+	/*
 	RCA #(.bw(12)) add1(.A(t1),.B(t2),.Cin(1'b0), .Sum(psum), .Cout());
 	//kogge_stone_Nbit_NOCLK #(.bw(12)) add1(.A(t1),.B(t2),.Cin(1'b0), .Sum(psum), .Cout());
 	RCA #(.bw(12)) add2(.A(psum), .B(t3), .Cin(1'b0), .Sum(out), .Cout());
 	//kogge_stone_Nbit_NOCLK #(.bw(12)) add2(.A(psum), .B(t3), .Cin(1'b0), .Sum(out), .Cout());
+	*/
 	
 
 endmodule
@@ -353,24 +412,110 @@ module karastuba_12bit(
 	karastuba_6bit km2(a1, br, x1);
 	karastuba_6bit km3(ar, b1, x2);
 	
-	//RCA #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
-	kogge_stone_Nbit_NOCLK #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
+	RCA #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
+	//kogge_stone_Nbit_NOCLK #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
 	//CSA #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
 	
 	wire [23:0] t1, t2, t3;
 	
+	/*
 	assign t1 = {xy, 12'b0};
 	assign t2 = {6'b0, tsum, 6'b0};
 	assign t3 = r;
+	*/
 	
-	wire [23:0] psum;
+	assign t1 = {xy, r};
+	assign t2 = {6'b0, tsum, 6'b0};
+	wire [23:6] tx = {xy,r[11:6]};
+	wire [23:6] ty = {6'b0, tsum};
+	wire [23:6] psum;
 	
+	RCA #(.bw(18)) add1(.A(tx), .B(ty), .Cin(1'b0), .Sum(psum), .Cout());
+	assign out = {psum,r[5:0]};
+	
+	/*
 	RCA #(.bw(24)) add1(.A(t1),.B(t3),.Cin(1'b0), .Sum(psum), .Cout());
 	//kogge_stone_Nbit_NOCLK #(.bw(24)) add1(.A(t1),.B(t3),.Cin(1'b0), .Sum(psum), .Cout());
 	RCA #(.bw(24)) add2(.A(psum),.B(t2),.Cin(1'b0), .Sum(out), .Cout());
 	//kogge_stone_Nbit_NOCLK #(.bw(24)) add2(.A(psum),.B(t2),.Cin(1'b0), .Sum(out), .Cout());
+	*/
 	
 endmodule
+
+
+module karastuba_12bit_test(
+	a,b,
+	out_t, CLK, RESETn
+	);
+	
+	input [11:0] a,b;
+	
+	output reg [23:0] out_t;
+	wire [23:0] out;
+	
+	input CLK, RESETn;
+	
+	wire [5:0] a1, ar;
+	wire [5:0] b1, br;
+	
+	wire [11:0] xy, r, x1,x2;
+	wire [11:0] mid;
+	wire [11:0] mid2, mid3;
+	
+	wire [12:0] tsum;
+	
+	assign a1 = a[11:6];
+	assign ar = a[5:0];
+	
+	assign b1 = b[11:6];
+	assign br = b[5:0];
+	
+	karastuba_6bit km0(a1, b1, xy);
+	karastuba_6bit km1(ar, br, r);
+	karastuba_6bit km2(a1, br, x1);
+	karastuba_6bit km3(ar, b1, x2);
+	
+	RCA #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
+	//kogge_stone_Nbit_NOCLK #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
+	//CSA #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
+	
+	wire [23:0] t1, t2, t3;
+	
+	/*
+	assign t1 = {xy, 12'b0};
+	assign t2 = {6'b0, tsum, 6'b0};
+	assign t3 = r;
+	*/
+	
+	assign t1 = {xy, r};
+	assign t2 = {6'b0, tsum, 6'b0};
+	wire [23:6] tx = {xy,r[11:6]};
+	wire [23:6] ty = {6'b0, tsum};
+	wire [23:6] psum;
+	
+	RCA #(.bw(18)) add1(.A(tx), .B(ty), .Cin(1'b0), .Sum(psum), .Cout());
+	assign out = {psum,r[5:0]};
+	
+	/*
+	RCA #(.bw(24)) add1(.A(t1),.B(t3),.Cin(1'b0), .Sum(psum), .Cout());
+	//kogge_stone_Nbit_NOCLK #(.bw(24)) add1(.A(t1),.B(t3),.Cin(1'b0), .Sum(psum), .Cout());
+	RCA #(.bw(24)) add2(.A(psum),.B(t2),.Cin(1'b0), .Sum(out), .Cout());
+	//kogge_stone_Nbit_NOCLK #(.bw(24)) add2(.A(psum),.B(t2),.Cin(1'b0), .Sum(out), .Cout());
+	*/
+	
+	always@(posedge CLK, negedge RESETn) begin
+		if(!RESETn) begin
+			out_t <= 0;
+		end else begin
+			out_t <= out;
+		end
+	end
+	
+endmodule
+
+
+
+
 
 module menMult(
 	a,b,
@@ -386,19 +531,20 @@ module menMult(
 	
 	//need rounding
 	
-	wire cout = multi[23];
+
+	wire msb = multi[23];
 	
 	wire [11:0] rnd = multi[23:12];
-	wire r = cout ? multi[12] : multi[11];
+	wire r = msb ? multi[12] : multi[11];
 	wire sticky = multi[10] | multi[9] | multi[8] | multi[7] | multi[6] | multi[5] | multi[4] | multi[3] | multi[2] | multi[1] | multi[0];
-	wire s = cout ? sticky | multi[11] : sticky;
-	wire g = cout ? multi[13] : multi[12];
+	wire s = msb ? sticky | multi[11] : sticky;
+	wire g = msb ? multi[13] : multi[12];
 	
 	wire rndup = r ? (s ? 1'b1 : r & g) : 1'b0;
 	
 	wire [11:0] rnd_p;
-	//RCA #(.bw(12)) rnd_add(.A(rnd), .B(12'b0), .Cin(rndup), .Sum(rnd_p), .Cout());
-	kogge_stone_Nbit_NOCLK #(.bw(12)) rnd_add(.A(rnd), .B(12'b0), .Cin(rndup), .Sum(rnd_p), .Cout());
+	RCA #(.bw(12)) rnd_add(.A(rnd), .B(12'b0), .Cin(rndup), .Sum(rnd_p), .Cout());
+	//kogge_stone_Nbit_NOCLK #(.bw(12)) rnd_add(.A(rnd), .B(12'b0), .Cin(rndup), .Sum(rnd_p), .Cout());
 
 	assign cout = rnd_p[11];
 	assign out = cout ? rnd_p[10:1] : rnd_p[9:0];
