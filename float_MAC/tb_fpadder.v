@@ -4,10 +4,10 @@
 // Company: 
 // Engineer:
 //
-// Create Date:   03:23:02 12/13/2022
+// Create Date:   23:01:35 12/16/2022
 // Design Name:   fpadder
-// Module Name:   C:/Xilinx/14.7/fpadder1/tb_fpadder.v
-// Project Name:  fpadder1
+// Module Name:   C:/Xilinx/14.7/fpadder_new/tb_fpadder.v
+// Project Name:  fpadder_new
 // Target Device:  
 // Tool versions:  
 // Description: 
@@ -22,60 +22,58 @@
 // 
 ////////////////////////////////////////////////////////////////////////////////
 
-module tb_fpadder;
+	module tb_fpadder;
 
-   // Inputs
-   reg [15:0] A;
-   reg [15:0] B;
-   reg CLK;
-   reg RESETn;
+	// Inputs
+	reg [15:0] A;
+	reg [15:0] B;
+	reg CLK;
+	reg RESETn;
 
-   // Outputs
-   wire [15:0] Sum;
+	// Outputs
+	wire [15:0] sum;
 
-   // Instantiate the Unit Under Test (UUT)
-   fpadder uut (
-      .A(A), 
-      .B(B), 
-      .CLK(CLK), 
-      .RESETn(RESETn), 
-      .sum(Sum)
-   );
+	// Instantiate the Unit Under Test (UUT)
+	fpadder uut (
+		.A(A), 
+		.B(B), 
+		.CLK(CLK), 
+		.RESETn(RESETn), 
+		.sum(sum)
+	);
 
-   initial begin
+	   initial begin
       // Initialize Inputs
-	#40
-	A = 16'h0xd5c7;
-	B = 16'h0x528f;
-	#200
-	A = 16'h0x4e6e;
-	B = 16'h0x5502;
-	#200
-	A = 16'h0x4fc1;
-	B = 16'h0xd4e1;
-	#200
-	A = 16'h0x54c7;
-	B = 16'h0xc366;
-	#200
-	A = 16'h0x5803;
-	B = 16'h0x59de;
-	#200
-	A = 16'h0xd17a;
-	B = 16'h0x591a;
-	#200
-	A = 16'h0xc13c;
-	B = 16'h0x5944;
-	#200
-	A = 16'h0x488b;
-	B = 16'h0xd006;
-	#200
-	A = 16'h0xd630;
-	B = 16'h0x528f;
-	#200
-	A = 16'h0x54d4;
-	B = 16'h0x5850;
-	#200
-
+   A = 16'h0x59ec;
+   B = 16'h0x57a6;
+   #200
+   A = 16'h0x570c;
+   B = 16'h0xd552;
+   #200
+   A = 16'h0x4f30;
+   B = 16'h0x4b14;
+   #200
+   A = 16'h0xd211;
+   B = 16'h0x595c;
+   #200
+   A = 16'h0x5a28;
+   B = 16'h0x59cd;
+   #200
+   A = 16'h0xc222;
+   B = 16'h0x59fb;
+   #200
+   A = 16'h0x580c;
+   B = 16'h0xd187;
+   #200
+   A = 16'h0x563a;
+   B = 16'h0x5976;
+   #200
+   A = 16'h0xd41b;
+   B = 16'h0xd4ac;
+   #200
+   A = 16'h0xc25c;
+   B = 16'h0x54d4;
+   #200
 
 
       // Wait 100 ns for global reset to finish
