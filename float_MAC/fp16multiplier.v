@@ -237,10 +237,19 @@ module biasAdder(
 	/*
 	RCA #(.bw(5)) badder1(.A(A),.B(B),.Cin(shift),.Sum(temp),.Cout(o1));
 	RCA #(.bw(5)) badder2(.A(temp),.B(5'b10000),.Cin(1'b1),.Sum(out),.Cout(o2));
-	
 	*/
+	
+	
+	
+	wire [4:0] temp_s, temp_ns;
+	wire to1, to2;
+	
 	RCA #(.bw(5)) badder1(.A(A),.B(B),.Cin(1'b1),.Sum(temp),.Cout(o1));
-	RCA #(.bw(5)) badder2(.A(temp),.B(5'b10000),.Cin(shift),.Sum(out),.Cout(o2));
+	RCA #(.bw(5)) badder2(.A(temp),.B(5'b10000),.Cin(1'b1),.Sum(temp_s),.Cout(to1));
+	RCA #(.bw(5)) badder3(.A(temp),.B(5'b10000),.Cin(1'b0),.Sum(temp_ns),.Cout(to2));
+	
+	assign o2 = shift ? to1 : to2;
+	assign out = shift ? temp_s : temp_ns;
 	
 endmodule
 
@@ -347,61 +356,6 @@ module karastuba_6bit(
 	
 
 endmodule
-	
-module karastuba_10bit(
-	a,b,
-	out
-	);
-	
-	input [9:0] a,b;
-	output [19:0] out;
-	
-	wire [5:0] a1, ar;
-	wire [5:0] b1, br;
-	
-	wire [11:0] xy, r;
-	wire [11:0] mid;
-	wire [11:0] mid2, mid3;
-	
-	wire [5:0] tsum[1:0];
-	
-	assign a1 = {1'b0, a[9:5]};
-	assign ar = {1'b0, a[4:0]};
-	
-	assign b1 = {1'b0, b[9:5]};
-	assign br = {1'b0, b[4:0]};
-	
-	karastuba_6bit km0(a1, b1, xy);
-	karastuba_6bit km1(ar, br, r);
-	
-	RCA #(.bw(6)) rca1(.A(a1), .B(ar), .Cin(1'b0), .Sum(tsum[0]), .Cout());
-	RCA #(.bw(6)) rca2(.A(b1), .B(br), .Cin(1'b0), .Sum(tsum[1]), .Cout());
-	
-	//7bit multiplier가 필요하다는 이유가 있음 이에 대한 수정 필요
-	wire [11:0] mout;
-	karastuba_6bit km2(tsum[0], tsum[1], mid);
-	
-	//assign mid={0,mout};
-	
-	RCA #(.bw(12)) sub1(.A(mid), .B(~xy), .Cin(1'b1), .Sum(mid2), .Cout());
-	RCA #(.bw(12)) sub2(.A(mid2), .B(~r), .Cin(1'b1), .Sum(mid3), .Cout());
-	//RCA #(.bw(14)) addsub({0,xy},{0,r},0,mid2);
-	//RCA #(.bw(13)) sub({0,mid},~mid2,1,mid3, sign);
-	
-	
-	wire [19:0] t1, t2, t3;
-	
-	assign t1 = {xy, 10'b0};
-	assign t2 = {5'b0, mid3, 5'b0};
-	assign t3 = r;
-	
-	wire [19:0] psum;
-	
-	RCA #(.bw(24)) add1(.A(t1),.B(t2),.Cin(1'b0), .Sum(psum), .Cout());
-	RCA #(.bw(24)) add2(.A(psum), .B(t3), .Cin(1'b0), .Sum(out), .Cout());
-	
-
-endmodule
 
 module karastuba_12bit(
 	a,b,
@@ -409,7 +363,9 @@ module karastuba_12bit(
 	);
 	
 	input [11:0] a,b;
+	
 	output [23:0] out;
+	
 	
 	wire [5:0] a1, ar;
 	wire [5:0] b1, br;
@@ -461,6 +417,89 @@ module karastuba_12bit(
 	
 endmodule
 
+
+module karastuba_11bit(
+	a,b,
+	out
+	);
+	
+	input [10:0] a,b;
+	output [21:0] out;
+	
+	wire [5:0] a1, ar;
+	wire [5:0] b1, br;
+	
+	wire [11:0] xy, r, x1,x2;
+	wire [11:0] mid;
+	wire [11:0] mid2, mid3;
+	
+	wire [11:0] tsum;
+	
+	assign a1 = {0,a[10:6]};
+	assign ar = a[5:0];
+	
+	assign b1 = {0,b[10:6]};
+	assign br = b[5:0];
+	
+	karastuba_6bit km0(a1, b1, xy);
+	karastuba_6bit km1(ar, br, r);
+	karastuba_6bit km2(a1, br, x1);
+	karastuba_6bit km3(ar, b1, x2);
+	
+	RCA #(.bw(11)) rca1(x1[10:0], x2[10:0], 1'b0, tsum[10:0],tsum[11]);
+	//kogge_stone_Nbit_NOCLK #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
+	//CSA #(.bw(12)) rca1(x1, x2, 1'b0, tsum[11:0],tsum[12]);
+	
+	wire [23:0] t1, t2, t3;
+	
+	/*
+	assign t1 = {xy, 12'b0};
+	assign t2 = {6'b0, tsum, 6'b0};
+	assign t3 = r;
+	*/
+	
+	//assign t1 = {xy, r};
+	//assign t2 = {6'b0, tsum, 6'b0};
+	
+	wire [21:6] tx = {xy,r[11:6]};
+	wire [21:6] ty = {4'b0, tsum};
+	wire [21:6] psum;
+	
+	RCA #(.bw(16)) add1(.A(tx), .B(ty), .Cin(1'b0), .Sum(psum), .Cout());
+	assign out = {psum,r[5:0]};
+	
+	/*
+	RCA #(.bw(24)) add1(.A(t1),.B(t3),.Cin(1'b0), .Sum(psum), .Cout());
+	//kogge_stone_Nbit_NOCLK #(.bw(24)) add1(.A(t1),.B(t3),.Cin(1'b0), .Sum(psum), .Cout());
+	RCA #(.bw(24)) add2(.A(psum),.B(t2),.Cin(1'b0), .Sum(out), .Cout());
+	//kogge_stone_Nbit_NOCLK #(.bw(24)) add2(.A(psum),.B(t2),.Cin(1'b0), .Sum(out), .Cout());
+	*/
+	
+endmodule
+
+module karastuba_11bit_test(
+	a,b,
+	out_t, CLK, RESETn
+	);
+	
+	input [10:0] a,b;
+	
+	output reg [21:0] out_t;
+	wire [21:0] out;
+	
+	input CLK, RESETn;
+	
+	karastuba_11bit k11(a,b,out);
+	
+	always@(posedge CLK, negedge RESETn) begin
+		if(!RESETn) begin
+			out_t <= 0;
+		end else begin
+			out_t <= out;
+		end
+	end	
+
+endmodule
 
 module karastuba_12bit_test(
 	a,b,
@@ -544,18 +583,19 @@ module menMult(
 	input [9:0] a,b;
 	output [9:0] out;
 	output cout;
-	wire [23:0] multi;
+	wire [23:2] multi;
 	
-	karastuba_12bit menti({1'b1,a,1'b0},{1'b1,b,1'b0},multi);
+	//karastuba_12bit menti({1'b1,a,1'b0},{1'b1,b,1'b0},multi);
+	karastuba_11bit menti({1'b1,a},{1'b1,b},multi);
 	
 	//need rounding
 	
-
+	
 	wire msb = multi[23];
 	
 	wire [11:0] rnd = multi[23:12];
 	wire r = msb ? multi[12] : multi[11];
-	wire sticky = multi[10] | multi[9] | multi[8] | multi[7] | multi[6] | multi[5] | multi[4] | multi[3] | multi[2] | multi[1] | multi[0];
+	wire sticky = multi[10] | multi[9] | multi[8] | multi[7] | multi[6] | multi[5] | multi[4] | multi[3] | multi[2]; //| multi[1] | multi[0];
 	wire s = msb ? sticky | multi[11] : sticky;
 	wire g = msb ? multi[13] : multi[12];
 	
@@ -634,7 +674,7 @@ module fp16multiplier(
 	 wire sign = (A[15]^B[15]);
 	 buf(product[15],sign);
 	 //assign product[15] = A[15]^B[15];
-	 biasAdder U0(A[14:10],B[14:10], bmp[14:10], cout);
+	 biasAdder U0(.A(A[14:10]),.B(B[14:10]), .out(bmp[14:10]), .shift(cout), .cout());
 	 menMult U1(A[9:0], B[9:0], bmp[9:0], cout);
 	 encoder U2(A[14:0], B[14:0], bmp, product[14:0]);
 	 
