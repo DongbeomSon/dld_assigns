@@ -613,15 +613,6 @@ module menMult(
 	
 endmodule
 
-
-module rounder(
-	multi,
-	out, cout
-	);
-	
-	
-endmodule
-
 module encoder(
 	A,B, product,
 	out
@@ -675,8 +666,6 @@ module fp16multiplier(
 	 input CLK, RESETn;
 	 output reg [15:0] out;
 	 
-	 reg 
-	 
 	 wire [14:0] bmp;
 	 wire [15:0] product;
 	 
@@ -685,7 +674,7 @@ module fp16multiplier(
 	 wire sign = (A[15]^B[15]);
 	 buf(product[15],sign);
 	 //assign product[15] = A[15]^B[15];
-	 
+	 biasAdder U0(.A(A[14:10]),.B(B[14:10]), .out(bmp[14:10]), .shift(cout), .cout());
 	 menMult U1(A[9:0], B[9:0], bmp[9:0], cout);
 	 encoder U2(A[14:0], B[14:0], bmp, product[14:0]);
 	 
