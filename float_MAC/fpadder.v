@@ -18,30 +18,33 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module fpadder(A, B, CLK, RESETn, Sum);
+module fpadder(A, B, CLK, RESETn, sum);
    input [15:0] A, B;
    input CLK, RESETn;
-   output reg [15:0] Sum;
+   output reg [15:0] sum;
    
+   wire [15:0] en_sum;
+	wire [15:0] Sum;
    wire [4:0] exptempA, exptempB;
    wire [10:0] mtstempA, mtstempB;
-   wire s, S;
+   wire S;
    wire [11:0] R_temp;
-   wire [10:0] mts;
+   wire [11:0] mts;
    wire [4:0] exp;
    
+   encoder_add en(A,B,Sum,en_sum);
    compshift cs0(A[14:10], B[14:10], {1'b1, A[9:0]}, {1'b1, B[9:0]}, exptempA, exptempB, mtstempA, mtstempB, S);
    mantissa mts0(A[15], B[15], mtstempA, mtstempB, R_temp);
-   normalization nor0(A[15], B[15], s, S, exptempA, exp, R_temp, mts);
+   normalization nor0(A[15], B[15], S, exptempA, exp, R_temp, mts, Sum);
    
-
+	
    
    always@(posedge CLK, negedge RESETn) begin
       if(!RESETn) begin
-         Sum <= 0;
+         sum <= 0;
       end
       else begin
-         Sum <= {s, exp, mts[9:0]};
+         sum <= en_sum;
       end
    end
    
@@ -49,22 +52,23 @@ endmodule
    
       //compare exponential and shift mantissa
 module compshift(expA, expB, mtsA, mtsB, expA_R, expB_R, mtsA_R, mtsB_R, S);
-   input [4:0] expA, expB;
-   input [10:0] mtsA, mtsB;
-   output wire [4:0] expA_R, expB_R;
-   output wire [10:0] mtsA_R, mtsB_R;
-   output wire S;
+	input [4:0] expA, expB;
+	input [10:0] mtsA, mtsB;
+	output wire [4:0] expA_R, expB_R;
+	output wire [10:0] mtsA_R, mtsB_R;
+	output wire S;
    
-   wire [10:0] mts_temp0;
-   wire [4:0] Difference;
-         
-   assign expA_R = (expA == expB | expA > expB) ? expA + 5'd1 : expB + 5'd1;
-   assign expB_R = (expA == expB | expA < expB) ? expB + 5'd1 : expA + 5'd1;
-   assign Difference = (expA > expB) ? expA - expB : expB - expA;
-   assign mtsA_R = (expA == expB | expA > expB) ? mtsA : mtsB;
-   assign mtsB_R = (expA == expB) ? mtsB : mts_temp0;
-   assign mts_temp0 = (expA > expB) ? mtsB >> Difference : mtsA >> Difference;
-   assign S = (expA == expB | expA > expB) ? 1'b1 : 1'b0;
+	wire [4:0] Difference;
+	wire [5:0] ex = {0, expA} - {0, expB};
+	wire ez = ~(ex[5]|ex[4]|ex[3]|ex[2]|ex[1]|ex[0]); //all zero?
+	   
+   
+	assign Difference = ~ex[5] ? expA - expB : expB - expA;
+	assign expA_R = ez ? expA + 5'd1 : ~ex[5] ? expA + 5'd1 : expB + 5'd1;
+	assign expB_R = ez ? expB + 5'd1 : ~ex[5] ? expA + 5'd1 : expB + 5'd1;
+	assign mtsA_R = ez ? mtsA : ~ex[5] ? mtsA : mtsB;
+	assign mtsB_R = ez ? mtsB : ~ex[5] ? mtsB >> Difference : mtsA >> Difference;
+	assign S = ez ? 1'b1 : ~ex[5] ? 1'b1 : 1'b0;
          
 endmodule
       
@@ -72,44 +76,179 @@ endmodule
          
 //Sub Add
 module mantissa(sA, sB, mtsA_R, mtsB_R, R_mts);
-   input sA, sB;
+   input wire sA, sB;
    input wire [10:0] mtsA_R, mtsB_R;
    output wire [11:0] R_mts;
          
-   assign R_mts = (sA ^ sB) ? mtsA_R - mtsB_R : mtsA_R + mtsB_R;
+   assign R_mts = sA ^ sB ? mtsA_R - mtsB_R : mtsA_R + mtsB_R;
 endmodule
       
-module normalization(sA, sB, s, S, expA_R, exp, R_mts, mts);
-   input sA, sB;
-   input wire S;
-   input wire [11:0] R_mts;
-   input wire[4:0] expA_R;
-   output s;
-   output wire [4:0] exp;
-   output wire [10:0] mts;
-   wire temp;
-	wire [4:0] exp_temp;
-	wire [10:0] mts_temp;
-   wire [11:0] mts_temp1;
+module normalization(sA, sB, S, expA_R, exp, R_mts, mts, Sum);
+	input sA, sB;
+	input wire S;
+	input wire [11:0] R_mts;
+	input wire[4:0] expA_R;
+	output wire [15:0] Sum;
+	output wire [4:0] exp;
+	output wire [11:0] mts;
+	wire temp, g, r, rndup;
+	wire [11:0] mts_temp;
+	wire [11:0] mts_rnd;
+	wire s;
+	
+
       
-   assign temp = sA ^ sB;
-   assign s = S ? (sA ^ (R_mts[11] & temp)) : (sB ^ (R_mts[11] & temp));
-   assign mts_temp1 = (R_mts[11] & temp) ? (~R_mts + 12'd1) : R_mts;
-   assign mts_temp = mts_temp1[11:1];
-   assign exp_temp = expA_R;
+	assign temp = sA ^ sB;
+	assign s = S ? (sA ^ (R_mts[11] & temp)) : (sB ^ (R_mts[11] & temp));
+	assign mts_temp = (R_mts[11] & temp) ? (~R_mts + 12'd1) : R_mts;
+	assign exp = expA_R;
+	assign mts = mts_temp[11:0];
 	
 	
+	wire [11:0] mmts [11:0];
+	wire [4:0] ee [11:0];
+		
+		
+	assign mmts[0] = mts;
+	assign ee[0] = exp;
 	genvar i;
-	generate 
-		for(i=0; i<11; i=i+1) begin : loop_1
-			assign mts = (mts_temp[10] == 1'b0) ? mts_temp << 1'b1 : mts_temp;
-			assign exp = (mts_temp[10] == 1'b0) ? exp_temp - 5'd1 : exp_temp;
+	generate
+		for(i = 0; i < 11; i=i+1) begin :loop_1
+			assign mmts[i+1] = mmts[i] << ~mmts[i][11];
+			assign ee[i+1] = ee[i] - {4'b0, ~mmts[i][11]};
 		end
 	endgenerate
 	
+	wire [11:0] mm;
+	assign mm = mmts[11];
+		
+	assign g = mm[1];
+	assign r = mm[0];
+	assign rndup = g & r;
+	assign mts_rnd = mm + rndup;
+	assign Sum = {s, ee[11], mts_rnd[10:1]};
+  
+endmodule
 
-				
+
+module CSA #(parameter bw = 4)(A, B, Cin, Sum, Cout);
+	input [bw-1:0] A, B, Cin;
+	output [bw:0] Sum;
+	output Cout;
+
+	wire [bw-1:0] S0;
+	wire [bw-1:0] C0;
+	
+	genvar i;
+	generate
+		for(i=0; i<bw; i=i+1) begin : loop_1
+			full_adder fa0(.A(A[i]), .B(B[i]), .cin(Cin[i]), .sum(S0[i]), .cout(C0[i]));
+		end
 		
-		
-      
+	endgenerate
+	assign Sum[0] = S0[0];
+
+	RCA #(.bw(4)) r0(.A({C0[bw-1:1], 1'b0}), .B({1'b0,S0[bw-1:1]}), .Cin(C0[0]), .Sum(Sum[bw:1]), .Cout(Cout));
+
+endmodule 
+
+module RCA #(parameter bw = 4)(A, B, Cin, Sum, Cout);
+	//can be subsitude with other adder to recude delay
+	input [bw:1] A;
+	input [bw:1] B;
+	input Cin;
+	output [bw:1] Sum;
+	output Cout;
+	
+	wire [bw:0] G;
+	wire [bw:0] P;
+	wire [bw:0] GG;
+	
+	assign G[0] = Cin;
+	assign P[0] = 0;
+	assign G[bw:1] = A & B;
+	assign P[bw:1] = A ^ B;
+	
+	assign GG[0] = G[0];
+	G_Cell U0(G[0], G[1], P[1], GG[1]);
+	
+	genvar i;
+	generate
+		for(i=1; i<=bw; i=i+1) begin: loop_1
+			if(i<bw)
+				G_Cell U1(GG[i], G[i+1], P[i+1], GG[i+1]);
+			assign Sum[i] = P[i] ^ GG[i-1];
+		end
+	endgenerate
+	
+	assign Cout = GG[bw];
+	
+endmodule
+
+module G_Cell(G0, G1, P1, GG);
+	input G0;
+	input G1;
+	input P1;
+	output GG;
+	
+	assign GG = G1 | (P1 & G0);
+endmodule
+
+module full_adder(
+	A,B,cin,
+	sum,cout);
+	
+	input A,B,cin;
+	output sum, cout;
+	
+	assign sum = A ^ B ^ cin;
+	assign cout = (A&B) | (B&cin)|(A&cin);
+	
+endmodule 
+module encoder_add(
+	A,B, product,
+	out
+);
+
+	input [15:0] A, B;
+	input [15:0] product;
+	
+	output [15:0] out;
+	
+	wire [4:0] bA = A[14:10];
+	wire [4:0] bB = B[14:10];
+	
+	wire [9:0] sA = A[9:0];
+	wire [9:0] sB = B[9:0];
+	
+	wire nzsA, nzsB;
+	
+	assign nzsA = (A[0] | A[1] | A[2] | A[3] | A[4] | A[5] | A[6] | A[7] | A[8] | A[9]);
+	assign nzsB = (B[0] | B[1] | B[2] | B[3] | B[4] | B[5] | B[6] | B[7] | B[8] | B[9]);
+	
+	wire zA = ~(bA[0] | bA[1] | bA[2] | bA[3] | bA[4]);
+	wire zB = ~(bB[0] | bB[1] | bB[2] | bB[3] | bB[4]);
+	
+	wire zzA = zA & ~(nzsA);
+	wire zzB = zB & ~(nzsB);
+	
+	wire iA = bA[0] & bA[1] & bA[2] & bA[3] & bA[4];
+	wire iB = bB[0] & bB[1] & bB[2] & bB[3] & bB[4];
+	
+	wire z = zzA | zzB;
+	wire i = iA | iB;
+	
+	wire nanA = iA & nzsA;
+	wire nanB = iB & nzsB;
+	
+	wire nan = nanA | nanB;
+	
+	wire [15:0] nanOut = {6'b011111,10'b1};
+	wire [14:0] inf = 15'h7c00;
+	
+	wire sign = A[15]^B[15];
+
+	
+	assign out = nan ? nanOut : (zA ? B : (zB ? A : (iA ? (sign ? nanOut : {A[15],inf}) : (iB ? (sign ? nanOut : {A[15],inf}) : product))));
+	
 endmodule
