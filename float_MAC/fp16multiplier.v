@@ -159,12 +159,13 @@ module Adder4(
 	
 	wire [1:0] carry;
 	
-	/*
+	
 	full_adder u0(a,b,c,temp[0],temp[1]);
 	full_adder u1(temp[0],add[0],1'b0,sum[0],carry[0]);
 	full_adder u2(temp[1],add[1],carry[0],sum[1],sum[2]);
-	*/
 	
+	
+	/*
 	wire [1:0] st0;
 	wire [3:0] st1;
 	wire [1:0] st2;
@@ -175,6 +176,7 @@ module Adder4(
 	full_adder u3(st1[0],st1[1],add[1],st1[3],st2[0]);
 	half_adder u4(st1[2],st1[3],sum[1],st2[1]);
 	or(sum[2],st2[0],st2[1]);
+	*/
 	
 	assign lsb = sum[0];
 	assign msb = sum[2:1];
@@ -194,6 +196,7 @@ module Adder5(
 	
 	wire [2:0] sum;
 	
+	/*
 	wire carry;
 	wire temp;
 	
@@ -202,6 +205,14 @@ module Adder5(
 	xor(sum[0], add[0], temp);
 	
 	full_adder u1(temp&add[0],add[1],carry,sum[1],sum[2]);
+	*/
+	
+	wire [2:0] temp;
+	
+	wire [1:0] carry;
+	
+	full_adder u0(a,b,add[0],sum[0],carry[0]);
+	full_adder u1(add[1],carry[0],1'b0,sum[1],sum[2]);
 	
 	assign lsb = sum[0];
 	assign msb[1:0] = sum[2:1];
@@ -211,17 +222,25 @@ endmodule
 
 module biasAdder(
 	A,B,
-	out, shift
+	out, shift,
+	cout
 	);
 	input [4:0] A,B;
 	input shift;
 	output [4:0] out;
-	
+	output cout;
 
 	wire [4:0]temp;
+	wire o1,o2;
+	assign cout = o1 | o2;
 	
-	RCA #(.bw(5)) badder1(.A(A),.B(B),.Cin(shift),.Sum(temp),.Cout());
-	RCA #(.bw(5)) badder2(.A(temp),.B(5'b10000),.Cin(1'b1),.Sum(out),.Cout());
+	/*
+	RCA #(.bw(5)) badder1(.A(A),.B(B),.Cin(shift),.Sum(temp),.Cout(o1));
+	RCA #(.bw(5)) badder2(.A(temp),.B(5'b10000),.Cin(1'b1),.Sum(out),.Cout(o2));
+	
+	*/
+	RCA #(.bw(5)) badder1(.A(A),.B(B),.Cin(1'b1),.Sum(temp),.Cout(o1));
+	RCA #(.bw(5)) badder2(.A(temp),.B(5'b10000),.Cin(shift),.Sum(out),.Cout(o2));
 	
 endmodule
 
