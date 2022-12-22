@@ -435,10 +435,10 @@ module karastuba_11bit(
 	
 	wire [11:0] tsum;
 	
-	assign a1 = {0,a[10:6]};
+	assign a1 = {1'b0,a[10:6]};
 	assign ar = a[5:0];
 	
-	assign b1 = {0,b[10:6]};
+	assign b1 = {1'b0,b[10:6]};
 	assign br = b[5:0];
 	
 	karastuba_6bit km0(a1, b1, xy);
