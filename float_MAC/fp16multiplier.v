@@ -577,18 +577,25 @@ endmodule
 
 module menMult(
 	a,b,
-	out, cout
+	out
 	);
 	
 	input [9:0] a,b;
-	output [9:0] out;
-	output cout;
-	wire [23:2] multi;
+	output [21:0] out;
 	
 	//karastuba_12bit menti({1'b1,a,1'b0},{1'b1,b,1'b0},multi);
-	karastuba_11bit menti({1'b1,a},{1'b1,b},multi);
+	karastuba_11bit menti({1'b1,a},{1'b1,b},out);
 	
-	//need rounding
+endmodule
+
+module rounder(
+	multi,
+	out, cout
+	);
+	
+	input [23:2] multi;
+	output [9:0]out;
+	output cout;
 	
 	
 	wire msb = multi[23];
@@ -608,20 +615,16 @@ module menMult(
 	assign cout = rnd_p[11];
 	assign out = cout ? rnd_p[10:1] : rnd_p[9:0];
 	
-	
-//	assign out = 0;
-	
 endmodule
 
-module encoder(
-	A,B, product,
+module encoder_a(
+	A,B,
 	out
 );
 
 	input [14:0] A, B;
-	input [14:0] product;
 	
-	output [14:0] out;
+	output [2:0] out;
 	
 	wire [4:0] bA = A[14:10];
 	wire [4:0] bB = B[14:10];
@@ -651,12 +654,27 @@ module encoder(
 	
 	wire nan = nanA | nanB;
 	
-	wire [14:0] nanOut = {5'b11111,10'b1};
-
 	
-	assign out = nan ? nanOut : (z ? (i ? nanOut : 15'b0) : i ? 15'h7c00 : product);
+
+	assign out = {nan,z,i};
+	//assign out = nan ? nanOut : (z ? (i ? nanOut : 15'b0) : i ? 15'h7c00 : product);
 	
 endmodule
+
+module encoder_b(
+	sig, bmp, product
+);
+	input [2:0] sig;
+	input [14:0] bmp;
+	output [14:0] product;
+	
+	
+	wire [14:0] nanOut = {5'b11111,10'b1};
+	
+	
+	assign product = sig[2] ? nanOut : (sig[1] ? (sig[0] ? nanOut : 15'b0) : sig[0] ? 15'h7c00 : bmp);
+endmodule
+	
 
 module fp16multiplier(
 		A,B,	CLK,	RESETn,
@@ -669,15 +687,33 @@ module fp16multiplier(
 	 wire [14:0] bmp;
 	 wire [15:0] product;
 	 
+	 wire [21:0] multi;
+	 
 	 wire cout;
 	 
-	 wire sign = (A[15]^B[15]);
-	 buf(product[15],sign);
+
 	 //assign product[15] = A[15]^B[15];
-	 biasAdder U0(.A(A[14:10]),.B(B[14:10]), .out(bmp[14:10]), .shift(cout), .cout());
-	 menMult U1(A[9:0], B[9:0], bmp[9:0], cout);
-	 encoder U2(A[14:0], B[14:0], bmp, product[14:0]);
 	 
+	 
+	 reg [5:0] p_A, p_B;
+	 reg [21:0] p_multi;
+	 reg [2:0] p_sig_en;
+	 
+	 menMult U0(A[9:0], B[9:0], multi);
+	 
+	 wire sign = (p_A[5]^p_B[5]);
+	 buf(product[15],sign);
+	 
+	 
+	 wire [2:0] sig_en; // [nan,z,i]
+	 encoder_a U1(A[14:0], B[14:0], sig_en);
+	 
+	 
+	 
+	 
+	 biasAdder U2(.A(p_A[4:0]),.B(p_B[4:0]), .out(bmp[14:10]), .shift(cout), .cout());
+	 rounder U3(p_multi, bmp[9:0], cout);
+	 encoder_b U4(p_sig_en, bmp, product[14:0]);
 	 //assign out = reg_out;
 	 
 	 always@(posedge CLK, negedge RESETn) begin
@@ -685,6 +721,10 @@ module fp16multiplier(
 			out <= 0;
 		end else begin
 			out <= product;
+			p_multi <= multi;
+			p_A <= A[15:10];
+			p_B <= B[15:10];
+			p_sig_en <= sig_en;
 		end
 	 end
 
