@@ -22,7 +22,7 @@
 // 
 ////////////////////////////////////////////////////////////////////////////////
 
-module tb_fpadder;
+module tb_fp16adder;
 
 	// Inputs
 	reg [15:0] A;
@@ -40,7 +40,7 @@ module tb_fpadder;
 	wire [15:0] sum;
 
 	// Instantiate the Unit Under Test (UUT)
-	fpadder uut (
+	fp16adder uut (
 		.A(A), 
 		.B(B), 
 		.CLK(CLK), 

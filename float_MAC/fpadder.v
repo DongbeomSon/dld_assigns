@@ -124,7 +124,7 @@ module normalization(sA, sB, S, expA_R, exp, R_mts, mts, Sum);
 	generate
 		for(i = 0; i < 11; i=i+1) begin :loop_1
 			assign mmts[i+1] = mmts[i] << ~mmts[i][11];
-			RCA #(.bw(12)) rc7(.A(ee[i]), .B({4'b0, ~mmts[i][11]}), .Cin(1'b1), .Sum(ee[i+1]), .Cout());
+			RCA #(.bw(5)) rc7(.A(ee[i]), .B(~{4'b0, ~mmts[i][11]}), .Cin(1'b1), .Sum(ee[i+1]), .Cout());
 			//assign ee[i+1] = ee[i] - {4'b0, ~mmts[i][11]};
 		end
 	endgenerate
