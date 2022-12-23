@@ -26,9 +26,10 @@ module fpadder(A, B, CLK, RESETn, sum);
    wire [15:0] en_sum;
 	wire [15:0] Sum;
    wire [4:0] exptempA, exptempB;
-   wire [10:0] mtstempA, mtstempB;
+   wire [10:0] mtstempA;
+	wire [21:0] mtstempB;
    wire S;
-   wire [11:0] R_temp;
+   wire [22:0] R_temp;
    wire [11:0] mts;
    wire [4:0] exp;
    
@@ -55,7 +56,8 @@ module compshift(expA, expB, mtsA, mtsB, expA_R, expB_R, mtsA_R, mtsB_R, S);
 	input [4:0] expA, expB;
 	input [10:0] mtsA, mtsB;
 	output wire [4:0] expA_R, expB_R;
-	output wire [10:0] mtsA_R, mtsB_R;
+	output wire [10:0] mtsA_R;
+	output wire [21:0] mtsB_R;
 	output wire S;
    
 	wire [4:0] expA_T, expB_T, Difference, Difference1, Difference2;
@@ -72,7 +74,7 @@ module compshift(expA, expB, mtsA, mtsB, expA_R, expB_R, mtsA_R, mtsB_R, S);
 	assign expA_R = ez ? expA_T : ~ex[5] ? expA_T : expB_T;
 	assign expB_R = ez ? expB_T : ~ex[5] ? expA_T : expB_T;
 	assign mtsA_R = ez ? mtsA : ~ex[5] ? mtsA : mtsB;
-	assign mtsB_R = ez ? mtsB : ~ex[5] ? mtsB >> Difference : mtsA >> Difference;
+	assign mtsB_R = ez ? mtsB : ~ex[5] ? {mtsB,11'b0} >> Difference : {mtsA,11'b0} >> Difference;
 	assign S = ez ? 1'b1 : ~ex[5] ? 1'b1 : 1'b0;
          
 endmodule
@@ -82,12 +84,13 @@ endmodule
 //Sub Add
 module mantissa(sA, sB, mtsA_R, mtsB_R, R_mts);
    input wire sA, sB;
-   input wire [10:0] mtsA_R, mtsB_R;
-   output wire [11:0] R_mts;
-	wire [11:0] T1_mts, T2_mts;
+   input wire [10:0] mtsA_R;
+	input wire [21:0] mtsB_R;
+   output wire [22:0] R_mts;
+	wire [22:0] T1_mts, T2_mts;
 	wire co1, co2;
-	RCA #(.bw(12)) rc5(.A({0, mtsA_R}), .B({1, ~mtsB_R}), .Cin(1'b1), .Sum(T1_mts), .Cout());
-	RCA #(.bw(12)) rc6(.A({0, mtsA_R}), .B({0, mtsB_R}), .Cin(1'b0), .Sum(T2_mts), .Cout());
+	RCA #(.bw(23)) rc5(.A({0, mtsA_R, 11'b0}), .B(~{0, mtsB_R}), .Cin(1'b1), .Sum(T1_mts), .Cout());
+	RCA #(.bw(23)) rc6(.A({0, mtsA_R, 11'b0}), .B({0, mtsB_R}), .Cin(1'b0), .Sum(T2_mts), .Cout());
          
    assign R_mts = sA ^ sB ? T1_mts : T2_mts;
 endmodule
@@ -95,26 +98,30 @@ endmodule
 module normalization(sA, sB, S, expA_R, exp, R_mts, mts, Sum);
 	input sA, sB;
 	input wire S;
-	input wire [11:0] R_mts;
+	input wire [22:0] R_mts;
 	input wire[4:0] expA_R;
 	output wire [15:0] Sum;
 	output wire [4:0] exp;
-	output wire [11:0] mts;
+	output wire [22:0] mts;
 	wire temp, g, r, rndup;
-	wire [11:0] mts_temp;
+	wire [22:0] mts_temp;
 	wire [11:0] mts_rnd;
 	wire s;
 	
 
       
 	assign temp = sA ^ sB;
-	assign s = S ? (sA ^ (R_mts[11] & temp)) : (sB ^ (R_mts[11] & temp));
-	assign mts_temp = (R_mts[11] & temp) ? (~R_mts + 12'd1) : R_mts;
+	assign s = S ? (sA ^ (R_mts[22] & temp)) : (sB ^ (R_mts[22] & temp));
+	
+	wire [22:0] neg_R_mts;
+	RCA #(.bw(23)) rc7(.A(~R_mts), .B(23'b0), .Cin(1'b1), .Sum(neg_R_mts), .Cout());
+	assign mts_temp = (R_mts[22] & temp) ? neg_R_mts : R_mts;
 	assign exp = expA_R;
-	assign mts = mts_temp[11:0];
+	assign mts = mts_temp;
+	assign mts = R_mts;
 	
 	
-	wire [11:0] mmts [11:0];
+	wire [22:0] mmts [11:0];
 	wire [4:0] ee [11:0];
 		
 		
@@ -123,19 +130,21 @@ module normalization(sA, sB, S, expA_R, exp, R_mts, mts, Sum);
 	genvar i;
 	generate
 		for(i = 0; i < 11; i=i+1) begin :loop_1
-			assign mmts[i+1] = mmts[i] << ~mmts[i][11];
-			RCA #(.bw(5)) rc7(.A(ee[i]), .B(~{4'b0, ~mmts[i][11]}), .Cin(1'b1), .Sum(ee[i+1]), .Cout());
+			assign mmts[i+1] = mmts[i] << ~mmts[i][22];
+			RCA #(.bw(5)) rc7(.A(ee[i]), .B(~{4'b0, ~mmts[i][22]}), .Cin(1'b1), .Sum(ee[i+1]), .Cout());
 			//assign ee[i+1] = ee[i] - {4'b0, ~mmts[i][11]};
 		end
 	endgenerate
 	
-	wire [11:0] mm;
+	wire [22:0] mm;
 	assign mm = mmts[11];
 		
-	assign g = mm[1];
-	assign r = mm[0];
-	assign rndup = g & r;
-	RCA #(.bw(12)) rc8(.A(mm), .B({11'b0, rndup}), .Cin(1'b0), .Sum(mts_rnd), .Cout());
+	assign g = mm[12];
+	assign r = mm[11];
+	assign st = mm[10] | mm[9] | mm[8] | mm[7] | mm[6] | mm[5] | mm[4] | mm[3] | mm[2] | mm[1] | mm[0];
+	assign rndup = (r & st) | (g & r);
+	wire flag;
+	RCA #(.bw(12)) rc8(.A(mm[22:11]), .B({11'b0, rndup}), .Cin(1'b0), .Sum(mts_rnd), .Cout(flag));
 	//assign mts_rnd = mm + rndup;
 	assign Sum = {s, ee[11], mts_rnd[10:1]};
   
