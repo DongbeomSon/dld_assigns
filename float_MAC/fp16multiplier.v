@@ -653,8 +653,6 @@ module encoder_a(
 	wire nanB = iB & nzsB;
 	
 	wire nan = nanA | nanB;
-	
-	
 
 	assign out = {nan,z,i};
 	//assign out = nan ? nanOut : (z ? (i ? nanOut : 15'b0) : i ? 15'h7c00 : product);
@@ -667,8 +665,8 @@ module encoder_b(
 	input [2:0] sig;
 	input [14:0] bmp;
 	output [14:0] product;
-	
-	
+
+
 	wire [14:0] nanOut = {5'b11111,10'b1};
 	
 	
@@ -676,7 +674,7 @@ module encoder_b(
 endmodule
 	
 
-module fp16multiplier(
+module fp16multiplier_pipe(
 		A,B,	CLK,	RESETn,
 		out
     );
@@ -725,6 +723,56 @@ module fp16multiplier(
 			p_A <= A[15:10];
 			p_B <= B[15:10];
 			p_sig_en <= sig_en;
+		end
+	 end
+endmodule
+	
+
+
+
+
+module fp16multiplier(
+		A,B,	CLK,	RESETn,
+		out
+    );
+	 input [15:0] A,B;
+	 input CLK, RESETn;
+	 output reg [15:0] out;
+	 
+	 wire [14:0] bmp;
+	 wire [15:0] product;
+	 
+	 wire [21:0] multi;
+	 
+	 wire cout;
+	 
+	 menMult U0(A[9:0], B[9:0], multi);
+	 
+	 wire sign = (A[15]^B[15]);
+	 buf(product[15],sign);
+	 
+	 wire [2:0] sig_en; // [nan,z,i]
+	 encoder_a U1(A[14:0], B[14:0], sig_en);
+	 
+	 
+	 
+	 
+
+	 biasAdder U2(.A(A[14:10]),.B(B[14:10]), .out(bmp[14:10]), .shift(cout), .cout());
+	 rounder U3(multi, bmp[9:0], cout);
+	 encoder_b U4(sig_en, bmp, product[14:0]);
+
+	 //assign out = reg_out;
+	 
+	 always@(posedge CLK, negedge RESETn) begin
+		if(!RESETn) begin
+			out <= 0;
+		end else begin
+			out <= product;
+			//p_multi <= multi;
+			//p_A <= A[15:10];
+			//p_B <= B[15:10];
+			//p_sig_en <= sig_en;
 		end
 	 end
 
