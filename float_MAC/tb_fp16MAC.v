@@ -50,38 +50,37 @@ module tb_fp16MAC;
 	#200
 */
 	#53
-	a = 16'h0xb9d4;
-	b = 16'h0xbda0;
+	a = 16'h0x3edf;
+	b = 16'h0xb9d3;
 	#20
-	a = 16'h0x366d;
-	b = 16'h0x2961;
+	a = 16'h0x3525;
+	b = 16'h0x3fa3;
 	#20
-	a = 16'h0x3974;
-	b = 16'h0xbf20;
+	a = 16'h0x3a48;
+	b = 16'h0x35cd;
 	#20
-	a = 16'h0x3668;
-	b = 16'h0xb727;
+	a = 16'h0x2bae;
+	b = 16'h0x3c98;
 	#20
-	a = 16'h0x3c22;
-	b = 16'h0xb962;
+	a = 16'h0xba1d;
+	b = 16'h0x3f78;
 	#20
-	a = 16'h0x3f21;
-	b = 16'h0xbd6f;
+	a = 16'h0xb90f;
+	b = 16'h0x34a4;
 	#20
-	a = 16'h0x3bd9;
-	b = 16'h0xbdfe;
+	a = 16'h0x3de8;
+	b = 16'h0x3e69;
 	#20
-	a = 16'h0x3a10;
-	b = 16'h0x2d07;
+	a = 16'h0x2dae;
+	b = 16'h0xb6dd;
 	#20
-	a = 16'h0x3219;
-	b = 16'h0xbc20;
+	a = 16'h0xb386;
+	b = 16'h0xbf53;
 	#20
-	a = 16'h0x3d7e;
-	b = 16'h0xae7a;
+	a = 16'h0x3b62;
+	b = 16'h0xbe9a;
 	#20
 
-	
 
 
 
