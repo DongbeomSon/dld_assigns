@@ -62,7 +62,7 @@ module compshift(expA, expB, mtsA, mtsB, expA_R, expB_R, mtsA_R, mtsB_R, S);
    
 	wire [4:0] expA_T, expB_T, Difference, Difference1, Difference2;
 	wire [5:0] ex;
-	RCA #(.bw(6)) rc0(.A({0, expA}), .B(~{0, expB}), .Cin(1'b1), .Sum(ex), .Cout());
+	RCA #(.bw(6)) rc0(.A({1'b0, expA}), .B(~{1'b0, expB}), .Cin(1'b1), .Sum(ex), .Cout());
 	wire ez = ~(ex[5]|ex[4]|ex[3]|ex[2]|ex[1]|ex[0]); //all zero?
 	   
    RCA #(.bw(5)) rc1(.A(expA), .B(~expB), .Cin(1'b1), .Sum(Difference1), .Cout());
@@ -91,8 +91,8 @@ module mantissa(sA, sB, mtsA_R, mtsB_R, R_mts);
    output wire [22:0] R_mts;
 	wire [22:0] T1_mts, T2_mts;
 	wire co1, co2;
-	RCA #(.bw(23)) rc5(.A({0, mtsA_R, 11'b0}), .B(~{0, mtsB_R}), .Cin(1'b1), .Sum(T1_mts), .Cout());
-	RCA #(.bw(23)) rc6(.A({0, mtsA_R, 11'b0}), .B({0, mtsB_R}), .Cin(1'b0), .Sum(T2_mts), .Cout());
+	RCA #(.bw(23)) rc5(.A({1'b0, mtsA_R, 11'b0}), .B(~{1'b0, mtsB_R}), .Cin(1'b1), .Sum(T1_mts), .Cout());
+	RCA #(.bw(23)) rc6(.A({1'b0, mtsA_R, 11'b0}), .B({1'b0, mtsB_R}), .Cin(1'b0), .Sum(T2_mts), .Cout());
          
    assign R_mts = sA ^ sB ? T1_mts : T2_mts;
 endmodule
@@ -185,6 +185,7 @@ module CSA #(parameter bw = 4)(A, B, Cin, Sum, Cout);
 
 endmodule 
 
+/*
 module RCA #(parameter bw = 4)(A, B, Cin, Sum, Cout);
 	//can be subsitude with other adder to recude delay
 	input [bw:1] A;
@@ -238,6 +239,8 @@ module full_adder(
 	assign cout = (A&B) | (B&cin)|(A&cin);
 	
 endmodule 
+
+*/
 module encoder_add(
 	A,B, product,
 	out
