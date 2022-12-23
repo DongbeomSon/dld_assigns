@@ -50,7 +50,8 @@ module tb_fpadder;
 
 	initial begin
 		// Initialize Inputs
-	#50	
+	#50
+	
 	A = 16'hdf4b;
 	B = 16'h671e;
 	ans = 16'h654b;
@@ -40052,9 +40053,6 @@ module tb_fpadder;
 	ans = 16'h7771;
 	#20
 
-	
-	
-	
 	
 	
 			// Wait 100 ns for global reset to finish

@@ -36,7 +36,7 @@ module fpadder(A, B, CLK, RESETn, sum);
    encoder_add en(A,B,Sum,en_sum);
    compshift cs0(A[14:10], B[14:10], {1'b1, A[9:0]}, {1'b1, B[9:0]}, exptempA, exptempB, mtstempA, mtstempB, S);
    mantissa mts0(A[15], B[15], mtstempA, mtstempB, R_temp);
-   normalization nor0(A[15], B[15], S, exptempA, exp, R_temp, mts, Sum);
+   normalization nor0(A[15], B[15], S, exptempA, exp, R_temp, Sum);
    
 	
    
@@ -73,8 +73,10 @@ module compshift(expA, expB, mtsA, mtsB, expA_R, expB_R, mtsA_R, mtsB_R, S);
 	assign Difference = ~ex[5] ? Difference1 : Difference2;
 	assign expA_R = ez ? expA_T : ~ex[5] ? expA_T : expB_T;
 	assign expB_R = ez ? expB_T : ~ex[5] ? expA_T : expB_T;
+	//assign expA_R = ez ? expA : ~ex[5] ? expA : expB;
+	//assign expB_R = ez ? expB : ~ex[5] ? expA : expB;
 	assign mtsA_R = ez ? mtsA : ~ex[5] ? mtsA : mtsB;
-	assign mtsB_R = ez ? mtsB : ~ex[5] ? {mtsB,11'b0} >> Difference : {mtsA,11'b0} >> Difference;
+	assign mtsB_R = ez ? {mtsB,11'b0} : ~ex[5] ? {mtsB,11'b0} >> Difference : {mtsA,11'b0} >> Difference;
 	assign S = ez ? 1'b1 : ~ex[5] ? 1'b1 : 1'b0;
          
 endmodule
@@ -95,21 +97,23 @@ module mantissa(sA, sB, mtsA_R, mtsB_R, R_mts);
    assign R_mts = sA ^ sB ? T1_mts : T2_mts;
 endmodule
       
-module normalization(sA, sB, S, expA_R, exp, R_mts, mts, Sum);
+      
+module normalization(sA, sB, S, expA_R, exp, R_mts, Sum);
 	input sA, sB;
 	input wire S;
 	input wire [22:0] R_mts;
 	input wire[4:0] expA_R;
 	output wire [15:0] Sum;
 	output wire [4:0] exp;
-	output wire [22:0] mts;
+	
 	wire temp, g, r, rndup;
 	wire [22:0] mts_temp;
 	wire [11:0] mts_rnd;
+	wire [22:0] mts;
 	wire s;
-	
+	 
 
-      
+   
 	assign temp = sA ^ sB;
 	assign s = S ? (sA ^ (R_mts[22] & temp)) : (sB ^ (R_mts[22] & temp));
 	
@@ -118,7 +122,7 @@ module normalization(sA, sB, S, expA_R, exp, R_mts, mts, Sum);
 	assign mts_temp = (R_mts[22] & temp) ? neg_R_mts : R_mts;
 	assign exp = expA_R;
 	assign mts = mts_temp;
-	assign mts = R_mts;
+	//assign mts = R_mts;
 	
 	
 	wire [22:0] mmts [11:0];
@@ -132,6 +136,7 @@ module normalization(sA, sB, S, expA_R, exp, R_mts, mts, Sum);
 		for(i = 0; i < 11; i=i+1) begin :loop_1
 			assign mmts[i+1] = mmts[i] << ~mmts[i][22];
 			RCA #(.bw(5)) rc7(.A(ee[i]), .B(~{4'b0, ~mmts[i][22]}), .Cin(1'b1), .Sum(ee[i+1]), .Cout());
+			//RCA #(.bw(5)) rc7(.A(ee[i]), .B(5'b0), .Cin(~mmts[i][22]), .Sum(ee[i+1]), .Cout());
 			//assign ee[i+1] = ee[i] - {4'b0, ~mmts[i][11]};
 		end
 	endgenerate
@@ -146,7 +151,12 @@ module normalization(sA, sB, S, expA_R, exp, R_mts, mts, Sum);
 	wire flag;
 	RCA #(.bw(12)) rc8(.A(mm[22:11]), .B({11'b0, rndup}), .Cin(1'b0), .Sum(mts_rnd), .Cout(flag));
 	//assign mts_rnd = mm + rndup;
-	assign Sum = {s, ee[11], mts_rnd[10:1]};
+	
+	//zero handling
+	wire [4:0] eout = mts_rnd[11] ? ee[11] : 4'b0;
+	wire sout = mts_rnd[11] ? s : 1'b0;
+	
+	assign Sum = {sout, eout, mts_rnd[10:1]};
   
 endmodule
 
