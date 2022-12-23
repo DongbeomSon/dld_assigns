@@ -27,21 +27,27 @@ module fp16MAC(
 	 
 	 output reg [15:0] acc;
 	 
+	 reg [15:0] input_a, input_b;
+	 
 	 wire [15:0] result_m;
 	 wire [15:0] result_a;
 	 wire [15:0] pAcc;
 	 
 	 assign pAcc = result_a;
 	 
-	 fp16multiplier m1(a,b,CLK,RESETn, result_m);
+	 fp16multiplier m1(input_a,input_b,CLK,RESETn, result_m);
 	 fp16adder a1(pAcc,result_m, CLK, RESETn, result_a);
 	 
 	 
 	 always@(posedge CLK, negedge RESETn) begin
 		if(!RESETn) begin
 			acc <= 0;
+			input_a <= 0;
+			input_b <= 0;
 		end else begin
 			acc <= result_a;
+			input_a <= a;
+			input_b <= b;
 	end
 	
 	end
