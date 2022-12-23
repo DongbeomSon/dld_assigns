@@ -58,14 +58,19 @@ module compshift(expA, expB, mtsA, mtsB, expA_R, expB_R, mtsA_R, mtsB_R, S);
 	output wire [10:0] mtsA_R, mtsB_R;
 	output wire S;
    
-	wire [4:0] Difference;
-	wire [5:0] ex = {0, expA} - {0, expB};
+	wire [4:0] expA_T, expB_T, Difference, Difference1, Difference2;
+	wire [5:0] ex;
+	RCA #(.bw(6)) rc0(.A({0, expA}), .B(~{0, expB}), .Cin(1'b1), .Sum(ex), .Cout());
 	wire ez = ~(ex[5]|ex[4]|ex[3]|ex[2]|ex[1]|ex[0]); //all zero?
 	   
-   
-	assign Difference = ~ex[5] ? expA - expB : expB - expA;
-	assign expA_R = ez ? expA + 5'd1 : ~ex[5] ? expA + 5'd1 : expB + 5'd1;
-	assign expB_R = ez ? expB + 5'd1 : ~ex[5] ? expA + 5'd1 : expB + 5'd1;
+   RCA #(.bw(5)) rc1(.A(expA), .B(~expB), .Cin(1'b1), .Sum(Difference1), .Cout());
+	RCA #(.bw(5)) rc2(.A(expB), .B(~expA), .Cin(1'b1), .Sum(Difference2), .Cout());
+	RCA #(.bw(5)) rc3(.A(expA), .B(5'b1), .Cin(1'b0), .Sum(expA_T), .Cout());
+	RCA #(.bw(5)) rc4(.A(expB), .B(5'b1), .Cin(1'b0), .Sum(expB_T), .Cout());
+	
+	assign Difference = ~ex[5] ? Difference1 : Difference2;
+	assign expA_R = ez ? expA_T : ~ex[5] ? expA_T : expB_T;
+	assign expB_R = ez ? expB_T : ~ex[5] ? expA_T : expB_T;
 	assign mtsA_R = ez ? mtsA : ~ex[5] ? mtsA : mtsB;
 	assign mtsB_R = ez ? mtsB : ~ex[5] ? mtsB >> Difference : mtsA >> Difference;
 	assign S = ez ? 1'b1 : ~ex[5] ? 1'b1 : 1'b0;
@@ -79,8 +84,12 @@ module mantissa(sA, sB, mtsA_R, mtsB_R, R_mts);
    input wire sA, sB;
    input wire [10:0] mtsA_R, mtsB_R;
    output wire [11:0] R_mts;
+	wire [11:0] T1_mts, T2_mts;
+	wire co1, co2;
+	RCA #(.bw(12)) rc5(.A({0, mtsA_R}), .B({1, ~mtsB_R}), .Cin(1'b1), .Sum(T1_mts), .Cout());
+	RCA #(.bw(12)) rc6(.A({0, mtsA_R}), .B({0, mtsB_R}), .Cin(1'b0), .Sum(T2_mts), .Cout());
          
-   assign R_mts = sA ^ sB ? mtsA_R - mtsB_R : mtsA_R + mtsB_R;
+   assign R_mts = sA ^ sB ? T1_mts : T2_mts;
 endmodule
       
 module normalization(sA, sB, S, expA_R, exp, R_mts, mts, Sum);
@@ -115,7 +124,8 @@ module normalization(sA, sB, S, expA_R, exp, R_mts, mts, Sum);
 	generate
 		for(i = 0; i < 11; i=i+1) begin :loop_1
 			assign mmts[i+1] = mmts[i] << ~mmts[i][11];
-			assign ee[i+1] = ee[i] - {4'b0, ~mmts[i][11]};
+			RCA #(.bw(12)) rc7(.A(ee[i]), .B({4'b0, ~mmts[i][11]}), .Cin(1'b1), .Sum(ee[i+1]), .Cout());
+			//assign ee[i+1] = ee[i] - {4'b0, ~mmts[i][11]};
 		end
 	endgenerate
 	
@@ -125,7 +135,8 @@ module normalization(sA, sB, S, expA_R, exp, R_mts, mts, Sum);
 	assign g = mm[1];
 	assign r = mm[0];
 	assign rndup = g & r;
-	assign mts_rnd = mm + rndup;
+	RCA #(.bw(12)) rc8(.A(mm), .B({11'b0, rndup}), .Cin(1'b0), .Sum(mts_rnd), .Cout());
+	//assign mts_rnd = mm + rndup;
 	assign Sum = {s, ee[11], mts_rnd[10:1]};
   
 endmodule
