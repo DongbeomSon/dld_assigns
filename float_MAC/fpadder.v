@@ -153,8 +153,11 @@ module normalization(sA, sB, S, expA_R, exp, R_mts, Sum);
 	//assign mts_rnd = mm + rndup;
 	
 	//zero handling
-	wire [4:0] eout = mts_rnd[11] ? ee[11] : 4'b0;
-	wire sout = mts_rnd[11] ? s : 1'b0;
+	wire [4:0] eru;
+	RCA #(.bw(5)) rc9(.A(ee[11]), .B(5'b0), .Cin(1'b1), .Sum(eru), .Cout());
+	
+	wire [4:0] eout = mts_rnd[11] ? ee[11] : flag ? eru : 4'b0;
+	wire sout = mts_rnd[11] ? s : flag ? s : 1'b0;
 	
 	assign Sum = {sout, eout, mts_rnd[10:1]};
   

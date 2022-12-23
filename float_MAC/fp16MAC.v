@@ -36,7 +36,7 @@ module fp16MAC(
 	 assign pAcc = result_a;
 	 
 	 fp16multiplier m1(input_a,input_b,CLK,RESETn, result_m);
-	 fp16adder a1(pAcc,result_m, CLK, RESETn, result_a);
+	 fpadder a1(pAcc,result_m, CLK, RESETn, result_a);
 	 
 	 
 	 always@(posedge CLK, negedge RESETn) begin
