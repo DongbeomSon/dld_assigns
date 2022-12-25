@@ -4,15 +4,15 @@
 // Company: 
 // Engineer:
 //
-// Create Date:   18:03:48 12/10/2022
-// Design Name:   fp16multiplier
-// Module Name:   C:/Users/Dongbeom Son/Desktop/repos/dld_assigns/float_MAC/tb_fp16multiplier.v
+// Create Date:   20:09:40 12/23/2022
+// Design Name:   fp16adder
+// Module Name:   C:/Users/Dongbeom Son/Desktop/repos/dld_assigns/float_MAC/tb_fp16adder.v
 // Project Name:  float_MAC
 // Target Device:  
 // Tool versions:  
 // Description: 
 //
-// Verilog Test Fixture created by ISE for module: fp16multiplier
+// Verilog Test Fixture created by ISE for module: fp16adder
 //
 // Dependencies:
 // 
@@ -22,40 +22,35 @@
 // 
 ////////////////////////////////////////////////////////////////////////////////
 
-
-module tb_fp16multiplier;
+module tb_fpadder;
 
 	// Inputs
 	reg [15:0] A;
 	reg [15:0] B;
 	reg CLK;
 	reg RESETn;
-
-	// Outputs
-	wire [15:0] out;
-	
-	
 	
 	//for verification
 	wire [15:0] error;
 	reg [15:0] ans;
 	reg [15:0] ans_reg;
-	assign error = out - ans_reg;
-	
-	reg [15:0] err_cnt;
+	assign error = sum - ans_reg;
+
+	// Outputs
+	wire [15:0] sum;
 
 	// Instantiate the Unit Under Test (UUT)
-	fp16multiplier uut (
+	fpadder uut (
 		.A(A), 
 		.B(B), 
 		.CLK(CLK), 
 		.RESETn(RESETn), 
-		.out(out)
+		.sum(sum)
 	);
 
 	initial begin
 		// Initialize Inputs
-	#50	
+	#50
 	
 	
 	

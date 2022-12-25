@@ -544,9 +544,10 @@ module karastuba_12bit_test(
 	assign t2 = {6'b0, tsum, 6'b0};
 	assign t3 = r;
 	*/
-	
+	/*
 	assign t1 = {xy, r};
 	assign t2 = {6'b0, tsum, 6'b0};
+	*/
 	wire [23:6] tx = {xy,r[11:6]};
 	wire [23:6] ty = {6'b0, tsum};
 	wire [23:6] psum;

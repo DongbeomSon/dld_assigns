@@ -6,29 +6,51 @@ fp_mat = []
 out = []
 ex = []
 
-f = open('tb_add.txt', 'w')
-#g = open('ans.txt', 'w')
-g = open('ans_add.txt', 'w')
-
+f = open('tb_acc.txt', 'w')
+g = open('ans_acc.txt', 'w')
+# h = open('ans_mul.txt', 'w')
+ans_m = []
+ans_a = []
 delay = "#20"
+i = 0
+ac = 0
 for idx in range(genNum):
-    x_f32 = random.uniform(-1, 1)
+    x_f32 = random.uniform(-2, 2)
     a = np.float16(x_f32)
 
     t = bin(np.float16(a).view('H'))[2:].zfill(16)
     f.write("\tA = 16'h" + hex(int(t, 2)).replace("0x", "") + ";\n")
 
-    x_f32 = random.uniform(-1, 1)
+    x_f32 = random.uniform(-2, 2)
     b = np.float16(x_f32)
     t = bin(np.float16(b).view('H'))[2:].zfill(16)
     f.write("\tB = 16'h" + hex(int(t, 2)).replace("0x", "") + ";\n")
     # f.write("\t#200\n")
-    c = a + b
+
+
+
+
+
+    c = np.float16(a * b)
     t = bin(np.float16(c).view('H'))[2:].zfill(16)
-    f.write("\tans = 16'h" + hex(int(t, 2)).replace("0x", "") + ";\n")
+    cout = "\tans_m = 16'h" + hex(int(t, 2)).replace("0x", "") + ";\n"
+
+
+    ac = np.float16(np.float16(c) + np.float16(ac))
+    t = bin(np.float16(ac).view('H'))[2:].zfill(16)
+    accout = "\tans_a = 16'h" + hex(int(t, 2)).replace("0x", "") + ";\n"
+
+    ans_a.append(accout)
+
+    i = i + 1
+
+
+    if(i > 0):
+        f.write(ans_a.pop())
+
     f.write("\t" + delay + "\n")
 
-    print(c)
+    print(ac)
 
 """
     t = bin(np.float16(c).view('H'))[2:].zfill(16)
@@ -41,5 +63,5 @@ for idx in range(genNum):
 """
 
 f.close()
-#g.close()
 g.close()
+# h.close()

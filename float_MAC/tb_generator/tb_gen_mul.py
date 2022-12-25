@@ -22,9 +22,11 @@ for idx in range(genNum):
     t = bin(np.float16(b).view('H'))[2:].zfill(16)
     f.write("\tB = 16'h" + hex(int(t, 2)).replace("0x","") +";\n")
     #f.write("\t#200\n")
+
     c = a*b
     t = bin(np.float16(c).view('H'))[2:].zfill(16)
     f.write("\tans = 16'h" + hex(int(t, 2)).replace("0x","") +";\n")
+
     f.write("\t" + delay + "\n")
 
 
